@@ -324,6 +324,9 @@ static class RetainedModels
     /// can draw it from its mesh: the main view's or the mirror's capture, and nothing
     /// else wanting the faces themselves (the retained reflections, the shadows).</summary>
     public static bool InstanceWanted => MeshesOn && (MainCapturing || MirrorCapturing) && !Capturing;
+    // Outside SVECTOR range, retained instances are the supported renderer even
+    // when the nearby-model comparison uses packets. Secondary capture is kept.
+    public static bool WideInstanceWanted => MainCapturing || MirrorCapturing;
 
     /// <summary>Set while the current submit's opaque faces went to an instance: the lit
     /// assembler builds only its blended faces and captures nothing.</summary>
@@ -381,6 +384,9 @@ static class RetainedModels
     /// </summary>
     public static bool TryInstance(PSMemory mem, uint sub, uint bias, uint vertices, int twin = -1, bool tile = false) =>
         Instance(mem, sub, bias, vertices, arm: false, twin, tile);
+
+    public static bool TryWideInstance(PSMemory mem, uint sub, uint bias, uint vertices, int twin = -1, bool tile = false) =>
+        Instance(mem, sub, bias, vertices, arm: false, twin, tile, wide: true);
 
     /// <summary>Instances of objects near the camera, which the clipped map assembler
     /// (<c>func_80030540</c>) would have assembled; never reset.</summary>
@@ -606,8 +612,10 @@ static class RetainedModels
             int vz = ((r0 * x + r1 * y + r2 * z) >> 12) + tz;
             if (box)
             {
-                int vx = Math.Clamp(((a0 * x + a1 * y + a2 * z) >> 12) + tx, -32768, 32767);
-                int vy = Math.Clamp(((b0 * x + b1 * y + b2 * z) >> 12) + ty, -32768, 32767);
+                int vx = ((a0 * x + a1 * y + a2 * z) >> 12) + tx;
+                int vy = ((b0 * x + b1 * y + b2 * z) >> 12) + ty;
+                // GPU meshes project full world coordinates. Keeping their true
+                // bounds is conservative for the packet comparison too.
                 float q = h / Math.Max(Math.Clamp(vz, 0, 65535), h * 0.5f);
                 float sx = Math.Clamp(ofx + vx * q, -1024f, 1023f), sy = Math.Clamp(ofy + vy * q, -1024f, 1023f);
                 bx0 = Math.Min(bx0, sx); bx1 = Math.Max(bx1, sx); by0 = Math.Min(by0, sy); by1 = Math.Max(by1, sy);
@@ -960,7 +968,7 @@ static class RetainedModels
         m.R20 = o[6]; m.R21 = o[7]; m.R22 = o[8]; m.Tx = o[9]; m.Ty = o[10]; m.Tz = o[11];
     }
 
-    static bool Instance(PSMemory mem, uint sub, uint bias, uint vertices, bool arm, int twin = -1, bool tile = false)
+    static bool Instance(PSMemory mem, uint sub, uint bias, uint vertices, bool arm, int twin = -1, bool tile = false, bool wide = false)
     {
         Instanced = false;
         LastMirrored = false;
@@ -1111,6 +1119,11 @@ static class RetainedModels
         Instances++;
         if (whole) InstancesWhole++;
         if (mirror) InstancesMirror++;
+        if (wide && Capturing)
+        {
+            if (tile) CaptureFlat(mem, header, normals, face, count, twoCurves: true);
+            else Capture(mem, header, normals, face, count, twin < 0 ? uint.MaxValue : (uint)twin << 5);
+        }
         return whole;
     }
 

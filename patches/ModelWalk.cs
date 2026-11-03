@@ -1150,6 +1150,8 @@ public static class ModelWalk
         uint weight = mem.ReadU16(arg + 0x28u);
         uint half = c.A0;
         uint matrix = mem.ReadU32(arg + 0x18u);
+        bool widePlacement = false;
+        long relativeY = 0;
         uint moRec = mem.ReadU32(arg + 0x14u);
         uint clipTime = mem.ReadU16(arg + 0x20u);
         ushort model = (ushort)c.A1;
@@ -1169,14 +1171,35 @@ public static class ModelWalk
         if (matrix != 0u)
         {
             // Placed in the world: project it, and light it from its own map tile.
-            mem.WriteU16(sp + 0x18u, (ushort)(mem.ReadU16(pos + 0u) - mem.ReadU16(CamWorldX)));
-            mem.WriteU16(sp + 0x1Au, (ushort)(mem.ReadU16(pos + 4u) - mem.ReadU16(CamWorldY)));
-            mem.WriteU16(sp + 0x1Cu, (ushort)(mem.ReadU16(pos + 8u) - mem.ReadU16(CamWorldZ)));
+            long dx = (int)mem.ReadU32(pos) - (long)(int)mem.ReadU32(CamWorldX);
+            long dy = (int)mem.ReadU32(pos + 4) - (long)(int)mem.ReadU32(CamWorldY);
+            relativeY = dy;
+            long dz = (int)mem.ReadU32(pos + 8) - (long)(int)mem.ReadU32(CamWorldZ);
+            widePlacement = dx < short.MinValue || dx > short.MaxValue
+                || dy < short.MinValue || dy > short.MaxValue || dz < short.MinValue || dz > short.MaxValue;
+            mem.WriteU16(sp + 0x18u, (ushort)dx);
+            mem.WriteU16(sp + 0x1Au, (ushort)dy);
+            mem.WriteU16(sp + 0x1Cu, (ushort)dz);
             c.A0 = sp + 0x18u;
             c.A1 = sp + 0x44u;
             c.A2 = sp + 0x90u;
             c.RA = 0x80032664u;
-            KingsField2.RotTrans(c, mem);
+            if (!widePlacement) KingsField2.RotTrans(c, mem);
+            else
+            {
+                // Retained instances carry full world positions. Preserve that
+                // placement through the setup matrix instead of wrapping an
+                // SVECTOR before the mesh can reach the GPU.
+                for (uint row = 0; row < 3; row++)
+                {
+                    long value = (short)mem.ReadU16(ViewMatrix + row * 6) * dx
+                        + (short)mem.ReadU16(ViewMatrix + row * 6 + 2) * dy
+                        + (short)mem.ReadU16(ViewMatrix + row * 6 + 4) * dz;
+                    value = (value >> 12) + (int)mem.ReadU32(ViewMatrix + 20 + row * 4);
+                    mem.WriteU32(sp + 0x44 + row * 4, unchecked((uint)value));
+                }
+                mem.WriteU32(sp + 0x90, 0);
+            }
 
             uint tz = (uint)((int)mem.ReadU32(pos + 8u) >> 11);
             uint tx = (uint)((int)mem.ReadU32(pos + 0u) >> 11);
@@ -1201,7 +1224,7 @@ public static class ModelWalk
         // 0x80 is the lit assembler with no depth bias; everything else is pushed
         // back 240 entries when the model sits at or above the camera.
         if ((assembler & 0xFFu) == 0x80u) assembler = 0xFFu;
-        else if ((short)mem.ReadU16(sp + 0x1Au) <= 0) depth += 0xF0u;
+        else if (widePlacement ? relativeY <= 0 : (short)mem.ReadU16(sp + 0x1Au) <= 0) depth += 0xF0u;
 
         c.A0 = rotPtr;
         c.A1 = sp + 0x30u;
@@ -1313,21 +1336,25 @@ public static class ModelWalk
         // KF2_GPUWORLD_SUBTEST=1: every forced-blend submit subtracts, on both paths.
         if (SubtractTest && pick < 0xFEu) pick = (pick & ~3u) | 2u;
         if (matrix == 0u && _walkOwns) ViewSpaceSubmits[pick == 0xFFu ? 0 : pick == 0xFEu ? 1 : 2]++;
-        bool whole = matrix != 0u && RetainedModels.InstanceWanted && (pick != 0xFEu || RetainedModels.TileOn)
-                     && RetainedModels.TryInstance(mem, sub, depth, mem.ReadU32(mesh + 4u),
-                                                   pick >= 0xFEu ? -1 : (int)(pick & 3u), tile: pick == 0xFEu);
+        uint vertexCount = mem.ReadU32(mesh + 4u);
+        int blendTwin = pick >= 0xFEu ? -1 : (int)(pick & 3u);
+        bool whole = matrix != 0u && (widePlacement ? RetainedModels.WideInstanceWanted : RetainedModels.InstanceWanted)
+                     && (widePlacement || pick != 0xFEu || RetainedModels.TileOn)
+                     && (widePlacement
+                         ? RetainedModels.TryWideInstance(mem, sub, depth, vertexCount, blendTwin, tile: pick == 0xFEu)
+                         : RetainedModels.TryInstance(mem, sub, depth, vertexCount, blendTwin, tile: pick == 0xFEu));
         if (whole && RetainedModels.LastMirrored) PlanarWalk.TakenLast();
         else if (!whole) MoPose.Materialize(c, mem);
 
-        if (whole && !RetainedModels.Checking) RetainedModels.NoteSkippedTransform();
-        else if (matrix != 0u)
+        if (whole && (!RetainedModels.Checking || widePlacement)) RetainedModels.NoteSkippedTransform();
+        else if (matrix != 0u && !widePlacement)
         {
             c.A0 = mem.ReadU32(mesh + 4u);
             c.RA = 0x80032A38u;
             KingsField2.func_8002E650(c, mem);
             if (RetainedModels.Instanced && RetainedModels.Checking) RetainedModels.Check(mem);
         }
-        else
+        else if (!widePlacement)
         {
             c.A0 = mem.ReadU32(mesh + 4u);
             c.A1 = depth;
@@ -1341,7 +1368,7 @@ public static class ModelWalk
             c.A0 = sub;
             c.A1 = depth;
             c.RA = 0x80032A68u;
-            if (!whole) KingsField2.func_8002F214(c, mem);
+            if (!whole && !widePlacement) KingsField2.func_8002F214(c, mem);
         }
         else if (pick == 0xFEu)
         {
@@ -1350,7 +1377,7 @@ public static class ModelWalk
             c.A1 = depth;
             c.A2 = 0u;
             c.RA = 0x80032A84u;
-            if (!whole) KingsField2.func_80030540(c, mem);
+            if (!whole && !widePlacement) KingsField2.func_80030540(c, mem);
         }
         else
         {
@@ -1359,7 +1386,7 @@ public static class ModelWalk
             c.A1 = depth;
             c.A2 = pick;
             c.RA = 0x80032A94u;
-            if (!whole) KingsField2.func_8002EAEC(c, mem);
+            if (!whole && !widePlacement) KingsField2.func_8002EAEC(c, mem);
         }
         PolyAssembler.TileMaterial = 0;
         PolyAssembler.NotWater = false;

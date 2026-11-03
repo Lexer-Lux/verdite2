@@ -64,6 +64,7 @@ public sealed partial class GlCore
         int L(string n) => _gl.GetUniformLocation(_progWorld, n);
         _uwR = L("uR"); _uwCam = L("uCam"); _uwT = L("uT"); _uwH = L("uH"); _uwC = L("uC"); _uwFb = L("uFb");
         _uwNear = L("uNear"); _uwCueH = L("uCueH"); _uwFogOn = L("uFogOn"); _uwMirror = L("uMirror");
+        _uwFogDistanceScale = L("uFogDistanceScale");
         _uwPlaneY = L("uPlaneY"); _uwPlaneBias = L("uPlaneBias");
         _uwScale = L("uScale"); _uwAniso = L("uAniso"); _uwBlend = L("uBlend"); _uwBlendOpaque = L("uBlendOpaque");
         _uwFluidN = L("uFluidN");
@@ -281,13 +282,14 @@ public sealed partial class GlCore
     int _nbHalvesGen = -1, _uwNeighbour = -1, _uwNbTile = -1;
     // 0089. DistanceFade's uniforms, in the world program and its normal program.
     int _uwFade = -1, _uwFadeZ = -1, _uwnFade = -1, _uwnFadeZ = -1;
+    int _uwFogDistanceScale = -1, _uwnFogDistanceScale = -1;
 
     /// <summary>0089. The frame's DistanceFade, or none.</summary>
-    void SendFade(int fade, int depth, RetainedScene.Frame? f)
+    void SendFade(int fade, int depth, RetainedScene.Frame? f, bool radial = true)
     {
         if (fade >= 0)
         {
-            if (f == null) _gl.Uniform4(fade, 0f, 0f, 0f, 0f);
+            if (f == null || !radial) _gl.Uniform4(fade, 0f, 0f, 0f, 0f);
             else _gl.Uniform4(fade, (float)f.View.CamX, (float)f.View.CamZ, f.FadeEdge, f.FadeBand);
         }
         if (depth >= 0) _gl.Uniform1(depth, f?.FadeDepth ?? 0f);
@@ -381,6 +383,7 @@ public sealed partial class GlCore
         if (_uwFb >= 0) _gl.Uniform2(_uwFb, fbW, fbH);
         if (_uwNear >= 0) _gl.Uniform1(_uwNear, 16f);
         if (_uwCueH >= 0) _gl.Uniform1(_uwCueH, Math.Max(1f, cueH));
+        if (_uwFogDistanceScale >= 0) _gl.Uniform1(_uwFogDistanceScale, RetainedScene.FogDistanceScale);
         if (_uwFogOn >= 0) _gl.Uniform1(_uwFogOn, fog ? 1 : 0);
         if (_uwScale >= 0) _gl.Uniform1(_uwScale, scale);
     }
@@ -565,7 +568,7 @@ public sealed partial class GlCore
             if (mirror)
             {
                 float q = RetainedScene.ChunkFogQ[c];
-                if (q > 0f && minZ > cueH * 65536f / q) continue;
+                if (q > 0f && minZ > cueH * 65536f / q * RetainedScene.FogDistanceScale) continue;
                 if (RetainedScene.Probe && dist > oldReach)
                 {
                     RetainedScene.OldCullVisible++;
@@ -734,6 +737,7 @@ public sealed partial class GlCore
             _gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             SetWorldView(CubeFaces[i], v.CamX, v.CamY, v.CamZ, 0f, 0f, 0f, n * 0.5f, n * 0.5f, n * 0.5f, n, n, v.H,
                          false, 1);
+            SendFade(_uwFade, _uwFadeZ, f, radial: false);
             CullChunks(CubeFaces[i], v.CamX, v.CamY, v.CamZ, 0f, 0f, 0f, n * 0.5f, n * 0.5f, n * 0.5f, n, n, false, 0f,
                        v.H, cubeReach);
             SendWorldLights(CubeFaces[i], v.CamX, v.CamY, v.CamZ, 0f, 0f, 0f, n * 0.5f, n * 0.5f, n * 0.5f, false, 0f);

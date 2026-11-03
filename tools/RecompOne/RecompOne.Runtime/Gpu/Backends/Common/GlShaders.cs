@@ -1649,6 +1649,7 @@ internal static class GlShaders
         uniform vec2  uFb;
         uniform float uNear;
         uniform float uCueH;
+        uniform float uFogDistanceScale;
         uniform int   uFogOn;
         uniform int   uMirror;
         uniform float uPlaneY;
@@ -1786,6 +1787,7 @@ internal static class GlShaders
 
         //@linearDepthCue
         float cueKeep(vec3 cue, float z) {
+            z /= max(1.0, uFogDistanceScale);
             int curve = int(cue.z + 0.5);
             if (uFogOn == 0 || curve == 0) return 1.0;
             if (curve == 5) return clamp(1.0 - linearDepthCue(z, cue.xy) / 4096.0, 0.0, 1.0);
@@ -1874,9 +1876,10 @@ internal static class GlShaders
             // shade8 puts it through the curve at every pixel.
             int curve = int(cue.z + 0.5);
             if (uFogOn != 0 && curve != 0 && uWorldPerPixel != 0) {
-                float q = min(uCueH * 65536.0 / max(z, 1.0), 131071.0);
+                float fogZ = z / max(1.0, uFogDistanceScale);
+                float q = min(uCueH * 65536.0 / max(fogZ, 1.0), 131071.0);
                 vLit = color;
-                vFog = curve == 5 ? linearDepthCue(z, cue.xy) : (cue.x * q + cue.y) / 4096.0;
+                vFog = curve == 5 ? linearDepthCue(fogZ, cue.xy) : (cue.x * q + cue.y) / 4096.0;
                 vCue = cue.xy;
                 vLight = uint(curve) << 24;
             } else {
@@ -2042,6 +2045,7 @@ internal static class GlShaders
         // eye, and a floor clipped at the camera's feet fogged to black.
         in vec2 vCue;
         uniform float uCueFromZ;
+        uniform float uFogDistanceScale;
         flat in uint vLight;
         flat in uvec2 vTex;
         flat in uint vMat;
@@ -2458,7 +2462,7 @@ internal static class GlShaders
         // it, at its own depth. Every other pixel is drawn as before.
         // 0100. The depth the fog is taken at, in vDepth's units: the distance under
         // RadialFog, the view depth everywhere else.
-        float fogDepth() { return uRadialFog != 0 ? vDepth / gCueScale : vDepth; }
+        float fogDepth() { return (uRadialFog != 0 ? vDepth / gCueScale : vDepth) / max(1.0, uFogDistanceScale); }
         bool gNbOn = false, gNbLit = false;
         float gNbW = 0.0;
         vec3 gNbColor = vec3(0.0);
@@ -2515,6 +2519,7 @@ internal static class GlShaders
 
         // The knee's keep at the frame's DQA, for a colour with no record.
         float frameKeep(float z) {
+            z /= max(1.0, uFogDistanceScale);
             float q = min(uClipH * 65536.0 / max(z, 1.0), 131071.0);
             float ir0 = clamp(uClipDq.x * q / 4096.0 + uClipDq.y, 0.0, 4096.0);
             return clamp(1.0 - (ir0 < 2800.0 ? ir0 : 3.0 * ir0 - 5600.0) / 4096.0, 0.0, 1.0);

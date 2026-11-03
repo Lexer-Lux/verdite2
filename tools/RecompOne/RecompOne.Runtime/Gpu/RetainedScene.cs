@@ -185,6 +185,8 @@ public static class RetainedScene
     /// the frame by the backend, at the head of the ordering table's walk, and the
     /// port stops assembling those faces.</summary>
     public static bool MainView;
+    /// <summary>Distance multiplier for the authored fog cue; one preserves it.</summary>
+    public static float FogDistanceScale = 1f;
 
     /// <summary>0085. The frame whose map the next table walk draws, set by the port
     /// when its tile walk starts; 0 once drawn.</summary>

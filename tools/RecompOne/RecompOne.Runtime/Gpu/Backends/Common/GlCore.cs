@@ -3243,7 +3243,7 @@ public sealed partial class GlCore : IGpuBackend
         if (_uSsrMurkColor >= 0) _gl.Uniform3(_uSsrMurkColor, WaterMurk.R, WaterMurk.G, WaterMurk.B);
         if (_uSsrMurkUp >= 0) _gl.Uniform4(_uSsrMurkUp, WaterMurk.UpX, WaterMurk.UpY, WaterMurk.UpZ, WaterMurk.MaxTilt);
         if (_uSsrSteps >= 0) _gl.Uniform1(_uSsrSteps, Math.Clamp(ScreenReflections.Steps, 1, 128));
-        if (_uSsrDqa >= 0) _gl.Uniform1(_uSsrDqa, (float)GteDepth.ProjDqa);
+        if (_uSsrDqa >= 0) _gl.Uniform1(_uSsrDqa, GteDepth.ProjDqa * RetainedScene.FogDistanceScale);
         if (_uSsrDqb >= 0) _gl.Uniform1(_uSsrDqb, (float)GteDepth.ProjDqb);
         if (_uSsrFogCurve >= 0) _gl.Uniform1(_uSsrFogCurve, ScreenReflections.FogCurve);
         if (_uSsrRadialFog >= 0) _gl.Uniform1(_uSsrRadialFog, GteDepth.RadialFog ? 1 : 0);

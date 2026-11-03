@@ -20,9 +20,10 @@ namespace Kf2;
 /// are drawn by <see cref="TileWalk"/> after the game's cells, through the far
 /// assembler, and <see cref="ModelWalk"/>'s visibility queries answer for them.
 ///
-/// The walk hands a tile's offset from the camera to the GTE as an s16, so no tile
-/// more than <see cref="Reach"/> tiles out on either axis can be placed. The game's
-/// fog is left alone: in a fogged area what is added is drawn black.
+/// Original packet placement uses signed shorts. The retained renderer instead
+/// keeps full world positions; packet fallbacks stay inside their native range.
+/// Authored fog distances scale with the requested range so added geometry does
+/// not remain behind the original black cutoff.
 ///
 /// See "Render distance" in docs/WIDESCREEN.md.
 /// </summary>
@@ -33,8 +34,10 @@ public static class RenderDistance
     /// <summary>The game's cone reaches 2688/256 tiles, level.</summary>
     public const float Stock = 10.5f;
 
-    /// <summary>Tiles either side of the camera a tile can be placed at.</summary>
-    public const int Reach = 15;
+    /// <summary>The retained horizontal reach. A separate view-depth guard clips
+    /// elevated/pitched geometry before the renderer's 65,536-unit depth limit.</summary>
+    public const int Reach = 30;
+    public const int NativeReach = 15;
     public const float Max = Reach;
 
     const int Side = 2 * Reach + 1;
@@ -52,6 +55,8 @@ public static class RenderDistance
 
     /// <summary>The far edge in tiles; <see cref="Stock"/> is the game's own.</summary>
     public static float Tiles { get; private set; } = Stock;
+    public static float EffectiveTiles => GpuWorld.Active ? Tiles : Math.Min(Tiles, NativeReach);
+    public static int EffectiveReach => GpuWorld.Active ? Reach : NativeReach;
 
     public static bool On => Tiles > Stock + 0.01f;
 
@@ -105,6 +110,7 @@ public static class RenderDistance
     /// <summary>From the start of the frame's own tile walk, after the game built its grid.</summary>
     public static void Build(PSMemory mem)
     {
+        RetainedScene.FogDistanceScale = GpuWorld.Active ? EffectiveTiles / Stock : 1f;
         foreach (int i in _cells) _far[i] = 0;
         _cells.Clear();
         if (!On || !ViewCone(mem, out float cx, out float cz, out float fx, out float fz, out float stockFar)) return;
@@ -140,7 +146,7 @@ public static class RenderDistance
             float px = tx + 0.5f - cx, pz = tz + 0.5f - cz;
             float d = px * fx + pz * fz;
             float l = MathF.Abs(px * fz - pz * fx);
-            bool cone = d > 0f && d <= Tiles + 0.5f && l <= slope * (d + Apex) + 1f;
+            bool cone = d > 0f && d <= EffectiveTiles + 0.5f && l <= slope * (d + Apex) + 1f;
             bool added = cone && (!inWindow || d > stockFar);
             if (_map) _glyph[bi] = stock != 0 ? '#' : cone && added ? '.' : ' ';
             if (!added) { _box[bi] = stock; continue; }

@@ -66,7 +66,7 @@ public static class PlanarCull
         if (!RenderDistance.ViewCone(mem, out float cx, out float cz, out float fx, out float fz, out float stockFar)) return;
 
         int ctx = (int)(mem.ReadU32(CamWorldX) >> 11), ctz = (int)(mem.ReadU32(CamWorldZ) >> 11);
-        float far = Math.Max(stockFar, RenderDistance.Tiles) + 0.5f;
+        float far = Math.Max(stockFar, RenderDistance.EffectiveTiles) + 0.5f;
         float slope = RenderDistance.Slope * CullCone.Factor;
         // The game's cone is drawn for a level camera. Pitched, the frustum's corner
         // rays run wider in plan: a ray (tanH, tanV, 1) turned by the pitch has a

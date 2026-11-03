@@ -35,7 +35,11 @@ public static class ViewDistanceFade
     /// <summary>After BeginFrame resets the frame, and GPU geometry chooses its path.
     /// Leave the mirror and first-person arm to the renderer's existing exclusions.
     /// Re-publish zeroes when disabled so a live toggle cannot leave a stale fade.</summary>
-    public static void AtFrame() => RetainedScene.SetFade(
-        Enabled && GpuWorld.Active ? RenderDistance.Tiles * 2048f : 0f,
-        Enabled && GpuWorld.Active ? Band : 0f, 0f);
+    public static void AtFrame()
+    {
+        RetainedScene.SetFade(
+            Enabled && GpuWorld.Active ? RenderDistance.Tiles * 2048f : 0f,
+            Enabled && GpuWorld.Active ? Band : 0f,
+            GpuWorld.Active && RenderDistance.Tiles > RenderDistance.NativeReach ? DistanceFade.DepthLimit : 0f);
+    }
 }

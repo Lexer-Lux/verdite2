@@ -436,7 +436,7 @@ public sealed partial class GlCore
         if (_uwNeighbour >= 0) _gl.Uniform1(_uwNeighbour, NeighbourBlend.Mode);
         if (_uwNbTile >= 0) _gl.Uniform1(_uwNbTile, NeighbourBlend.Tile);
         // 0089. The main view only: the mirror's walk is the game's own.
-        SendFade(_uwFade, _uwFadeZ, mirror ? null : f);
+        SendFade(_uwFade, _uwFadeZ, f, radial: !mirror);
         // Fogged at each pixel's own depth: a face clipped at the eye has no corner
         // whose screen-affine fog holds at the clip.
         if (_uwCueFromZ >= 0) _gl.Uniform1(_uwCueFromZ, RetainedScene.MainFogFromZ ? Math.Max(1f, f.View.H) : 0f);
@@ -1286,6 +1286,7 @@ public sealed partial class GlCore
         _uwnDepthCull = L("uDepthCull"); _uwnDepthStep = L("uDepthStep");
         _uwnSwellOn = L("uSwellOn"); _uwnSwell = L("uSwell"); _uwnZSlice = L("uZSlice");
         _uwnFade = L("uFade"); _uwnFadeZ = L("uFadeZ");
+        _uwnFogDistanceScale = L("uFogDistanceScale");
         _gl.UseProgram(_progWorldNrm);
         void Unit(string n, int v) { int l = L(n); if (l >= 0) _gl.Uniform1(l, v); }
         Unit("uVram", 0); Unit("uHalves", HalvesUnit); Unit("uFrameDepth", FrameDepthUnit); Unit("uVeilPass", 0);
@@ -1336,6 +1337,7 @@ public sealed partial class GlCore
             if (_uwnModelGteC >= 0) _gl.Uniform2(_uwnModelGteC, v.Cx, v.Cy);
             if (_uwnFb >= 0) _gl.Uniform2(_uwnFb, (float)src.Wide1x, src.H);
             if (_uwnNear >= 0) _gl.Uniform1(_uwnNear, RetainedScene.MainNear);
+            if (_uwnFogDistanceScale >= 0) _gl.Uniform1(_uwnFogDistanceScale, RetainedScene.FogDistanceScale);
             if (_uwnHalfGate >= 0) _gl.Uniform1(_uwnHalfGate, 1);
             if (_uwnSnap >= 0) _gl.Uniform1(_uwnSnap, GteDepth.Subpixel ? 0 : 1);
             if (_uwnProjH >= 0) _gl.Uniform1(_uwnProjH, Math.Max(1f, v.H));

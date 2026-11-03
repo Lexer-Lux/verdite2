@@ -128,7 +128,7 @@ public static class ReflectionReach
         // what a tile can be placed at (RenderDistance.Reach).
         _viewOk = RenderDistance.ViewCone(mem, out float cx, out float cz, out _vfx, out _vfz, out float stockFar);
         _vcx = cx; _vcz = cz;
-        _vfar = Math.Max(RenderDistance.Tiles, stockFar) + 0.5f;
+        _vfar = Math.Max(RenderDistance.EffectiveTiles, stockFar) + 0.5f;
         _vslope = RenderDistance.Slope * CullCone.Factor;
         int ctx = (int)MathF.Floor(cx), ctz = (int)MathF.Floor(cz);
         int grown = 0, drawn = _drawnList.Count;
@@ -150,7 +150,7 @@ public static class ReflectionReach
                 {
                     int x = tx + dx, z = tz + dz;
                     if ((dx | dz) == 0 || (uint)x >= 80u || (uint)z >= 80u) continue;
-                    if (Math.Abs(x - ctx) > RenderDistance.Reach || Math.Abs(z - ctz) > RenderDistance.Reach) continue;
+                    if (Math.Abs(x - ctx) > RenderDistance.EffectiveReach || Math.Abs(z - ctz) > RenderDistance.EffectiveReach) continue;
                     int n = (z * 80 + x) * 2 + up;
                     if (_seen[n] == _stamp || !Drawable(mem, n)) continue;
                     _seen[n] = _stamp;

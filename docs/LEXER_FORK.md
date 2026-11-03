@@ -40,8 +40,8 @@ restored vanilla held-Interact running. Every scoped input bit was restored.
 Keyboard events opened and closed Remaster Editor on F2; repeated keydown did not
 toggle it. Physical controller feel and menu-back presentation remain unaccepted.
 
-The reported consumed Fire Crystal with no learned spell remains under
-investigation. No gameplay-mod fix or save repair is claimed here.
+The Fire Crystal report was resolved: Fire Ball was learned and is equipped
+through Equipment/Magic. Use Magic lists support spells. No save repair applies.
 
 ## View distance and smooth distance fade
 
@@ -55,7 +55,7 @@ values between menu steps remain untouched until edited.
 
 | Setting | Saved key | Default | Effect |
 |---|---|---|---|
-| View distance | `kf2.renderdistance` | 10.5 | Extends geometry visibility to at most 15 tiles ahead. |
+| View distance | `kf2.renderdistance` | 10.5 | Extends retained GPU geometry and authored fog distance, up to 30 tiles ahead. |
 | Smooth distance fade | `kf2.distancefade.on` | False | Dithers GPU-drawn main-view scenery out over the last tile of horizontal distance. |
 | Enhancement distance (existing) | `kf2.enhancedistance` | 0 (everywhere) | Limits graphics effects, not geometry visibility. |
 | Fog (existing) | `kf2.fog` | 2 | Chooses corner, pixel-depth or eye-distance atmospheric fog. |
@@ -63,8 +63,9 @@ values between menu steps remain untouched until edited.
 The fade uses the renderer's existing `DistanceFade` shader and per-frame
 `RetainedScene.SetFade` path, which previously had no port caller. Toggling it
 does not change the visibility grid, draw distance, fog, or enhancement distance.
-Off publishes zero weights, restoring the previous transition. It deliberately
-does not rewrite the atmospheric fog to expose scenery the game hides in darkness.
+Off publishes zero radial fade weights. View distance separately scales the
+authored fog range, preserving its curve, so distant geometry is not left behind
+the old black cutoff. The fade checkbox does not control that fog scaling.
 It is a screen-door dither, not alpha blending or a change to the fog curve.
 
 The draw limit is forward depth in the native cone; the fade is horizontal
@@ -73,9 +74,15 @@ geometry before the cone's forward edge. GPU geometry must be active: software
 rendering and packet-only fallback faces do not acquire a fade. The renderer
 excludes reflections, sky and the first-person arm from this main-view effect.
 
-The upper bound is real: native tile placement carries camera-relative geometry
-in signed 16-bit coordinates, with 2,048 units per tile. Extending beyond 15
-needs a different geometry path, not a larger slider. The lower bound retains
+Native tile placement carries camera-relative geometry in signed 16-bit
+coordinates, with 2,048 units per tile. Beyond 15, the retained map bypasses that
+placement and far models use full camera-relative coordinates. Unsupported
+packet-only geometry is not wrapped into view. GPU geometry must be active;
+the original packet renderer retains its 15-tile effective limit without
+overwriting the saved choice. A separate 65,024-unit view-depth guard protects
+the main view, planar mirror and retained cube at steep angles, independent of
+the optional radial fade. Far model instances retain reflection/shadow capture,
+and their blended bounds use their full projection. The lower bound retains
 the game's own 10.5-tile visibility; this change extends that visibility rather
 than replacing its flood/culling logic. Non-finite inputs reset to the stock bound.
 
@@ -85,12 +92,36 @@ Save/Discard and the Settings window use the same two persisted keys.
 
 ### Lexeditor integration handoff
 
-The plugin owner should expose the float `kf2.renderdistance` (10.5..15) and bool
+The plugin owner should expose the float `kf2.renderdistance` (10.5..30) and bool
 `kf2.distancefade.on` (False), using the existing native-settings adapter and shared
 Settings screen. Do not map the checkbox to enhancement distance, even fog, or
 `kf2.fog`. No gameplay mod or new player-library item is required for these native
 settings. This branch contains no plugin edits; it builds on controls commit
 `2715edf`, so that controls work must be retained when integrating it.
+
+### Greater-range verification
+
+Private hidden GL45 captures on the actual renderer use real, unmodified map
+geometry. The fixed camera at (97280,-10304,82944), pitch0/yaw3072, looks along
+a 28-tile corridor in fdat02. At15 the frame selects106 halves, none beyond15.5,
+and6 model instances. At30 it selects173 halves,67 beyond15.5, reaches27 tiles
+and admits13 model instances. The matched PNGs show the formerly black distant
+floor;12,778 pixels differ. The 30/on and 30/off cases retain identical geometry
+selection; their radial fade weights differ. This corridor ends before the
+30-setting's last-tile band, so identical PNGs there are expected.
+
+The native slider reached30 by mouse input, and the actual in-game setting has
+40 half-tile steps from10.5 to30. Separate-process checks restored24.5 with fade
+off and on independently, preserving custom bindings/sensitivities and unrelated
+settings. The covering distance check includes the physical depth guard and
+packet fallback. These checks distinguish geometry/renderer evidence from UI
+and persistence evidence; a larger slider alone is not rendering acceptance.
+
+Private fixtures explicitly suppress Audio.Initialize and physical input
+initialization before startup, assert no audio device/mixer or input context,
+force a hidden GL window, and use kill-on-close process-tree cleanup. Player
+data is never the fixture. Installed release acceptance must repeat the matched
+captures against the published, pinned archive, not only this source build.
 
 ### Verification
 

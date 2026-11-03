@@ -22,9 +22,9 @@ public sealed class DistancePage : IPatchPage
           "es-419": "Distancia de visión (baldosas)"
         },
         "kf2.renderdistance.tooltip": {
-          "en": "Draws the map further ahead. The game supports 10.5 to 15. Fog can still hide distant scenery.",
-          "pt-BR": "Desenha o mapa mais à frente. O jogo permite de 10,5 a 15. A neblina ainda pode ocultar o cenário distante.",
-          "es-419": "Dibuja el mapa más adelante. El juego permite de 10,5 a 15. La niebla todavía puede ocultar el escenario distante."
+          "en": "Extends scenery and its fog range. Values above 15 require GPU geometry.",
+          "pt-BR": "Amplia o cenário e o alcance da neblina. Valores acima de 15 exigem geometria na GPU.",
+          "es-419": "Amplía el escenario y el alcance de la niebla. Los valores superiores a 15 requieren geometría en GPU."
         },
         "kf2.distancefade.label": {
           "en": "Smooth distance fade",

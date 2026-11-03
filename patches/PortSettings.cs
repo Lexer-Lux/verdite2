@@ -248,6 +248,7 @@ public static class PortSettings
     public static readonly PortSetting RenderDist = new()
     {
         Key = RenderDistance.Key, Envs = ["KF2_RENDERDIST"], Label = "View distance (tiles)",
+        Tip = "Extends scenery and its fog range. Values above 15 require GPU geometry.",
         Page = World, MenuLabel = "VIEW DISTANCE",
         Steps = Enumerable.Range(0, (int)((RenderDistance.Max - RenderDistance.Stock) * 2) + 1)
             .Select(i => (double)RenderDistance.Stock + i * .5).ToArray(),

@@ -57,7 +57,7 @@ public static class ScreenReflections
         if (float.IsNaN(ir0) || GteDepth.ProjDqa >= 0) return float.PositiveInfinity;
         // IR0 = (DQA * q + DQB) / 4096 with q = H * 65536 / z.
         double q = (ir0 * 4096.0 - GteDepth.ProjDqb) / GteDepth.ProjDqa;
-        return q <= 0 ? float.PositiveInfinity : (float)(GteDepth.ProjH * 65536.0 / q);
+        return q <= 0 ? float.PositiveInfinity : (float)(GteDepth.ProjH * 65536.0 / q) * RetainedScene.FogDistanceScale;
     }
 
     /// <summary>Steps along the ray; the spacing grows with distance, so the near

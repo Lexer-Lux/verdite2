@@ -369,11 +369,15 @@ public static class TileWalk
         // water on the packets, a half with blended faces keeps only those.
         bool mirror = PlanarWalk.Mirroring;
         bool gpu = mirror ? GpuWorld.MirrorActive : GpuWorld.Active;
-        if (gpu && TakeWhole(mem, rec, mirror))
+        if (gpu && TakeWhole(mem, rec, mirror, !NativePlacementFits(mem, rec)))
         {
             Epilogue(c, mem, sp);
             return;
         }
+
+        // A retained half uses full world coordinates. Anything left on the
+        // original packet path must fit its signed-short camera-relative vector.
+        if (!NativePlacementFits(mem, rec)) { _skipped++; Epilogue(c, mem, sp); return; }
 
         c.A0 = ViewMatrix;
         c.RA = 0x80031988u;
@@ -486,11 +490,11 @@ public static class TileWalk
 
     /// <summary>0085. Whether the GPU draws this half whole, noted for it if so: no
     /// setup, transform or assembler is left for it.</summary>
-    static bool TakeWhole(PSMemory mem, uint rec, bool mirror)
+    static bool TakeWhole(PSMemory mem, uint rec, bool mirror, bool opaqueOnly = false)
     {
         uint model = mem.ReadU8(rec);
         if (Beyond(mem, model)) return false;
-        if (GpuWorld.KindOf(mem, model) != GpuWorld.Faces.Opaque && !(mirror ? GpuWorld.MirrorWaterActive : GpuWorld.WaterActive))
+        if (!opaqueOnly && GpuWorld.KindOf(mem, model) != GpuWorld.Faces.Opaque && !(mirror ? GpuWorld.MirrorWaterActive : GpuWorld.WaterActive))
             return false;
         if (mirror) { NoteMirrored(rec); GpuWorld.MirrorSkipped++; }
         else { NoteDrawn(rec); GpuWorld.Skipped++; }
@@ -502,11 +506,27 @@ public static class TileWalk
     static bool TakenInCell(PSMemory mem, uint rec)
     {
         bool mirror = PlanarWalk.Mirroring;
-        if (!(mirror ? GpuWorld.MirrorActive : GpuWorld.Active) || !TakeInCell) return false;
-        if (!TakeWhole(mem, rec, mirror)) return false;
-        TileCalls++;
-        _halves++;
-        return true;
+        bool fits = NativePlacementFits(mem, rec);
+        if ((mirror ? GpuWorld.MirrorActive : GpuWorld.Active) && (TakeInCell || !fits)
+            && TakeWhole(mem, rec, mirror, !fits))
+        {
+            TileCalls++;
+            _halves++;
+            return true;
+        }
+        // Do not wrap an unsupported packet-only half across the camera.
+        return !fits;
+    }
+
+    static bool NativePlacementFits(PSMemory mem, uint rec)
+    {
+        uint offset = rec - MapBase;
+        long x = (offset % 800 / 10) * 2048L + 1024 - (int)mem.ReadU32(CamWorldX);
+        long z = (offset / 800) * 2048L + 1024 - (int)mem.ReadU32(CamWorldZ);
+        long y = -(long)mem.ReadU8(rec + 1) * 128 - (int)mem.ReadU32(CamWorldY);
+        return x is >= short.MinValue and <= short.MaxValue
+            && y is >= short.MinValue and <= short.MaxValue
+            && z is >= short.MinValue and <= short.MaxValue;
     }
 
     /// <summary>KF2_GPUWORLD_CELL=0: call the half routine for every half again, as the

@@ -120,3 +120,13 @@ offscreen from their ImGui draw lists and inspected. This establishes control
 layout, not how the fade looks in a game scene. GPU-rendered gameplay appearance
 and a delivered installed candidate remain acceptance work; this branch does not
 replace the active installation or modify player saves.
+
+Remaining acceptance:
+
+- Integrate the two keys through the plugin owner's shared Settings adapter.
+- Build and deliver the fork through that owner's installation path.
+- Check the GPU-rendered scene with fade off/on at fixed view distance, then
+  change view distance while holding fade fixed. Check sky, water, models and arm.
+- Obtain CI results. On 2026-11-03 the fork's Actions API listed zero workflows
+  despite the inherited `ci.yml` existing on `main`; enabling it by filename
+  returned HTTP 404. No CI pass is claimed and no remote default branch was pushed.

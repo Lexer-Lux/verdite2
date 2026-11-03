@@ -161,6 +161,34 @@ dotnet run --project tests/controls/ControlsCheck.csproj -c Release `
   ABSOLUTE_SOURCE_DIRECTORY/config/onboarding.json
 ```
 
+## Look default and enemy-turn compensation
+
+The native gamepad yaw and pitch defaults are x3. Explicit saved values, including
+older configurations without an analog-defaults marker, are retained. The old
+destructive defaults migration was removed; no bindings, saves or live player
+settings are rewritten for this change. Classic/Modern binding choices remain
+independent of sensitivity.
+
+The original full-stick sensitivity is x1: yaw is35 angle units per15Hz tick
+standing,28 moving, and pitch32. Angles use4096 units per revolution. The actual
+hooked native look routine measured x3 yaw105/84 and pitch96; these are below the
+x4 overspeed ceiling. Thus the compensation ratio is3/1=3 for this game.
+
+EnemyTurn defaults to x3 speed and x9 acceleration on the existing native turns
+toward the player, retaining the native target clamp and zero-speed actions.
+The measured chase baseline is speed11/acceleration4: compensation supplies33/36.
+The actual hooked native quarter turn takes94 ticks at x1 and32 ticks at x3.
+Non-player turns retain their original timing, and byte comparisons confirm no
+other creature fields change. Additional standing tracking defaults off; it is a
+separate optional AI feature, not part of proportional compensation. Explicit
+saved enemy-turn and tracking choices remain intact. The native setup suggests
+x3 without extra acceleration and x4 when optional look acceleration reaches the
+player's x4 ceiling. Real controller feel and combat balance remain human checks.
+
+The covering tests/controls/Program.cs also measures these native routines in
+private RAM and verifies custom sensitivity, bindings and native preference-file
+preservation. It creates no game window and does not open a player save.
+
 ## Native notification API for source mods
 
 NativeNotifications.Post(owner,glyphs), PostText(owner,text), Flush(cpu,memory)

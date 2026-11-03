@@ -168,7 +168,7 @@ public static class Setup
             () => Spu.ReverbMode == SpuReverbMode.Enhanced ? "1" : "0", "KF2_REVERB"),
         [PositionalAudio.ModeKey] = new(t => PositionalAudio.Set((PositionalAudio.Mode)I(t, 2)),
             () => ((int)PositionalAudio.Current).ToString(CultureInfo.InvariantCulture), "KF2_POSAUDIO"),
-        [EnemyTurn.Key] = new(t => EnemyTurn.SetMultiplier(F(t, 1f)),
+        [EnemyTurn.Key] = new(t => EnemyTurn.SetMultiplier(F(t, EnemyTurn.DefaultMultiplier)),
             () => EnemyTurn.Multiplier.ToString(CultureInfo.InvariantCulture), "KF2_ENEMYTURN"),
         [Analog.AccelKey] = new(t => Analog.LookAccel = B(t, false), () => Text(Analog.LookAccel), "KF2_ANALOG_ACCEL"),
     };

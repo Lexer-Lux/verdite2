@@ -40,7 +40,7 @@
     "kf2.gearcompare.enabled": "True",
     "kf2.autoreload.enabled": "True",
     "kf2.analog.accel": "False",
-    "kf2.enemyturn": "1",
+    "kf2.enemyturn": "3",
     "kf2.widescreen.hud": "False",
     "kf2.renderdistance": "10.5",
     "kf2.controls.profile": "0"
@@ -717,7 +717,7 @@
             "kf2.controls": null,
             "kf2.analog.accel": "True"
           },
-          "value": 2.2
+          "value": 4
         }
       ],
       "slider": {
@@ -733,15 +733,15 @@
       "presets": [
         {
           "option": 0,
-          "value": 1
+          "value": 3
         },
         {
           "option": 0,
-          "value": 1
+          "value": 3
         },
         {
           "option": 2,
-          "value": 2.2
+          "value": 4
         }
       ],
       "follows": "gameplay"
@@ -1024,9 +1024,9 @@
       "es-419": "Los combates de King's Field están equilibrados en torno a la velocidad con que giras. En la PlayStation girabas a una velocidad fija, y cada criatura estaba ajustada para seguirla."
     },
     "kf2.setup.turning.port": {
-      "en": "The port can turn you faster. Look acceleration on the right stick speeds the turn up to 2.2 times while you hold it out, and mouse look turns as fast as you move the mouse. A creature at its original pace can then be circled forever without landing a hit.",
-      "pt-BR": "O port permite virar mais rápido. A aceleração de visão no analógico direito acelera a virada em até 2,2 vezes enquanto você o mantém inclinado, e a visão com o mouse vira tão rápido quanto você move o mouse. Uma criatura no ritmo original pode então ser contornada para sempre sem levar um golpe.",
-      "es-419": "El port permite girar más rápido. La aceleración de vista en la palanca derecha acelera el giro hasta 2.2 veces mientras la mantienes inclinada, y la vista con mouse gira tan rápido como muevas el mouse. Una criatura a su ritmo original puede entonces ser rodeada para siempre sin recibir un golpe."
+      "en": "The default gamepad look speed is x3. Optional stick acceleration can reach the x4 limit. Mouse look follows your hand.",
+      "pt-BR": "A velocidade de visão padrão no controle é x3. A aceleração opcional pode atingir o limite de x4. A visão com mouse acompanha sua mão.",
+      "es-419": "La velocidad de vista predeterminada del control es x3. La aceleración opcional puede alcanzar el límite de x4. La vista con mouse sigue tu mano."
     },
     "kf2.setup.turning.solution": {
       "en": "The answer is to let creatures turn faster when they turn toward you; their wandering keeps the game's pace. Choose how you will control the game, and the enemy turn speed below follows it. You can set it yourself.",
@@ -1044,9 +1044,9 @@
       "es-419": "Controles de tanque (3D)"
     },
     "kf2.setup.turning.tank.desc": {
-      "en": "One stick walks and turns, as the D-pad does; L1 and R1 strafe. You turn at the original rate.",
-      "pt-BR": "Um analógico anda e vira, como o direcional; L1 e R1 se deslocam de lado. Você vira na velocidade original.",
-      "es-419": "Una palanca camina y gira, como la cruceta; L1 y R1 te desplazan de lado. Giras a la velocidad original."
+      "en": "One stick walks and turns; L1 and R1 strafe. The look sensitivity setting controls turn speed; its default is x3.",
+      "pt-BR": "Um analógico anda e vira; L1 e R1 deslocam de lado. A sensibilidade de visão controla a velocidade de giro; o padrão é x3.",
+      "es-419": "Una palanca camina y gira; L1 y R1 desplazan de lado. La sensibilidad de vista controla la velocidad de giro; el valor predeterminado es x3."
     },
     "kf2.setup.turning.2d": {
       "en": "Twin stick (2D)",
@@ -1054,9 +1054,9 @@
       "es-419": "Dos palancas (2D)"
     },
     "kf2.setup.turning.2d.desc": {
-      "en": "The left stick walks and strafes, the right stick turns and looks, at the D-pad's rate. You turn at the original rate.",
-      "pt-BR": "O analógico esquerdo anda e se desloca de lado, o direito vira e olha, na velocidade do direcional. Você vira na velocidade original.",
-      "es-419": "La palanca izquierda camina y se desplaza de lado, la derecha gira y mira, a la velocidad de la cruceta. Giras a la velocidad original."
+      "en": "The left stick walks and strafes; the right stick turns and looks. The default look sensitivity is x3.",
+      "pt-BR": "O analógico esquerdo anda e desloca de lado; o direito vira e olha. A sensibilidade de visão padrão é x3.",
+      "es-419": "La palanca izquierda camina y desplaza de lado; la derecha gira y mira. La sensibilidad de vista predeterminada es x3."
     },
     "kf2.setup.turning.2daccel": {
       "en": "Twin stick (2D) with acceleration",
@@ -1064,9 +1064,9 @@
       "es-419": "Dos palancas (2D) con aceleración"
     },
     "kf2.setup.turning.2daccel.desc": {
-      "en": "As twin stick, but holding the right stick out speeds the turn up to 2.2 times. Enemy turn speed rises to x2.2 to match.",
-      "pt-BR": "Como dois analógicos, mas manter o analógico direito inclinado acelera a virada em até 2,2 vezes. A velocidade de giro dos inimigos sobe para x2,2 para acompanhar.",
-      "es-419": "Como dos palancas, pero mantener la palanca derecha inclinada acelera el giro hasta 2.2 veces. La velocidad de giro de los enemigos sube a x2.2 para igualarla."
+      "en": "Twin sticks with look acceleration, capped at x4 of the original rate. Enemy turn speed is suggested at x4; you can adjust it below.",
+      "pt-BR": "Dois analógicos com aceleração de visão, limitada a x4 da velocidade original. Sugere-se giro dos inimigos em x4; ajuste abaixo.",
+      "es-419": "Dos palancas con aceleración de vista, limitada a x4 de la velocidad original. Se sugiere giro de enemigos en x4; ajústalo abajo."
     },
     "kf2.setup.enemyturn": {
       "en": "Enemy turn speed",

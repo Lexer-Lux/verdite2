@@ -314,7 +314,7 @@ public static class PortSettings
         Tip = "How fast enemies turn to follow you, as a multiple of the game's own speed. Higher makes them harder to circle around.",
         Page = Gameplay, MenuLabel = "ENEMY TURN", Steps = [1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3, 4, 5, 6, 8],
         MenuValue = v => v <= EnemyTurn.Min ? "ORIGINAL" : "X" + Number(v),
-        Default = EnemyTurn.Min, Live = () => EnemyTurn.Multiplier, Apply = v => EnemyTurn.SetMultiplier((float)v),
+        Default = EnemyTurn.DefaultMultiplier, Live = () => EnemyTurn.Multiplier, Apply = v => EnemyTurn.SetMultiplier((float)v),
         Stored = Stored.Float, Ui = Ui.None, Min = EnemyTurn.Min, Max = EnemyTurn.Max,
     };
 
@@ -366,10 +366,10 @@ public static class PortSettings
 
     /// <summary>A sensitivity, a part of a SENS row: kept as a float, as the Settings
     /// window's slider writes it.</summary>
-    static PortSetting Sensitivity(string key, string env, string label, Func<float> get, Action<float> set, double min, double max) => new()
+    static PortSetting Sensitivity(string key, string env, string label, Func<float> get, Action<float> set, double min, double max, double defaultValue = 1) => new()
     {
         Key = key, Envs = [env], Label = label, Steps = [1], MenuValue = Number,
-        Default = 1, Live = () => get(), Apply = v => set((float)Math.Clamp(v, min, max)),
+        Default = defaultValue, Live = () => get(), Apply = v => set((float)Math.Clamp(v, min, max)),
         Stored = Stored.Float, Ui = Ui.None, Min = min, Max = max,
     };
 
@@ -383,9 +383,9 @@ public static class PortSettings
             (v, _) => [v, v], usable);
 
     static readonly PortSetting StickTurn = Sensitivity(Analog.TurnSensKey, "KF2_ANALOG_TURN", "Stick turn sensitivity",
-        () => Analog.TurnSens, v => Analog.TurnSens = v, 0.1, 3);
+        () => Analog.TurnSens, v => Analog.TurnSens = v, 0.1, 3, Analog.DefaultLookSensitivity);
     static readonly PortSetting StickLook = Sensitivity(Analog.PitchSensKey, "KF2_ANALOG_PITCH", "Stick look sensitivity",
-        () => Analog.PitchSens, v => Analog.PitchSens = v, 0.1, 3);
+        () => Analog.PitchSens, v => Analog.PitchSens = v, 0.1, 3, Analog.DefaultLookSensitivity);
 
     /// <summary>The sticks' turn and look; X1 is the D-pad's speed. In 3D the look half
     /// does nothing, and the turn is the left stick's.</summary>

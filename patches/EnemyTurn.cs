@@ -48,7 +48,7 @@ namespace Kf2;
 ///
 ///     KF2_ENEMYTURN=1..8        the multiplier (Gameplay ▸ Enemy turn speed)
 ///     KF2_ENEMYTURN_TRACK=0     no turning at the player while standing (Gameplay ▸
-///                               Track you while standing; on)
+///                               Track you while standing; off by default)
 ///     KF2_ENEMYTURN_ALL=1       scale every turn, wandering too -- comparison only
 ///     KF2_ENEMYTURN_PROBE=1     a census of the turn's callers every 5 s
 ///     KF2_ENEMYTURN_PROBE=2     also a line a tick for each active creature in reach:
@@ -77,6 +77,7 @@ public static class EnemyTurn
 
     public const string Key = "kf2.enemyturn";
     public const float Min = 1f, Max = 8f;
+    public const float DefaultMultiplier = Analog.DefaultLookSensitivity / Analog.OriginalLookSensitivity;
     public const string TrackKey = "kf2.enemyturn.track";
 
     /// <summary>The top speed of a turn made while standing, before the multiplier:
@@ -85,12 +86,12 @@ public static class EnemyTurn
     const int TrackSpeed = 16;
 
     /// <summary>1 is the game's own turn.</summary>
-    public static float Multiplier { get; private set; } = 1f;
+    public static float Multiplier { get; private set; } = DefaultMultiplier;
 
     public static void SetMultiplier(float k) => Multiplier = Math.Clamp(k, Min, Max);
 
-    /// <summary>Turn a standing creature at the player each tick. Inert at x1.</summary>
-    public static bool Track { get; set; } = true;
+    /// <summary>Optional extra standing tracking, off by default. Inert at x1.</summary>
+    public static bool Track { get; set; } = false;
 
     static bool _fromEnv, _trackFromEnv, _probe, _trace, _all, _queued, _hooked, _stageHooked;
 

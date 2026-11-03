@@ -167,9 +167,8 @@ public static class Analog
     // stays fine -- the ramp only starts past LookAccelThreshold -- and it falls
     // away three times faster than it builds, so easing off is immediate.
     //
-    // Off by default: it turns the view past the D-pad's rate, up to 2.2 times it,
-    // and the game's combat is built on how fast the player can turn. The default
-    // stick is the original's speed; faster is something a player asks for.
+    // Off by default. The x3 sensitivity is direct; enabling this extra ramp can
+    // drive it up to Step's x4 ceiling. Enemy-turn compensation defaults to x3.
     public static bool LookAccel = false;
     public static float LookAccelMax = 2.2f;
     public static float LookAccelTime = 0.5f;
@@ -193,8 +192,12 @@ public static class Analog
     // deadzone never reaches the game as a D-pad turn either.
     const float TankDeadzone = 0.3f;
     const float TankTurnCurve = 2f;
-    public static float TurnSens = 1.0f;
-    public static float PitchSens = 1.0f;
+    // Full deflection is sensitivity times the original rate (35 standing,
+    // 28 walking, 32 pitch), below Step's x4 ceiling at the new x3 default.
+    public const float OriginalLookSensitivity = 1f;
+    public const float DefaultLookSensitivity = 3f;
+    public static float TurnSens = DefaultLookSensitivity;
+    public static float PitchSens = DefaultLookSensitivity;
     public static float MoveSens = 1.0f;
 
     public static bool InvertTurn;
@@ -222,8 +225,8 @@ public static class Analog
 
     // The right stick eased toward what it asks, by the game's own step (see Ramp).
     // Off, it is direct: the turn and look are the stick's position at once, still
-    // capped at the D-pad's rate and L2/R2's, and a released stick stops dead, so
-    // CameraInstantStop says nothing. The speed is the original's either way; only
+    // capped at Step's ceiling, and a released stick stops dead, so
+    // CameraInstantStop says nothing. Sensitivity sets the speed either way; only
     // the drag a held button has, four or five ticks in and out, is gone. 2D only:
     // 3D's left-stick turn is the D-pad's, ease and all. Off by default since 0.5.1:
     // on a stick the ease read as the view lagging the thumb.
@@ -258,14 +261,6 @@ public static class Analog
     // stick and 2D's right stick never turn at once.
     static float _rampTurn, _rampPitch;
     static bool _rampTurnLive, _rampPitchLive;
-
-    /// <summary>Raised whenever the shipped defaults change in a way a saved value
-    /// should not survive. 2: the stick turns at the D-pad's rate, so look
-    /// acceleration and the instant stop went off and sensitivities above 1.0 were
-    /// put back to 1.0, once. 3: the stick's ease went off by default, and a saved
-    /// "on" was turned off, once.</summary>
-    const int DefaultsVersion = 3;
-    const string DefaultsKey = "kf2.analog.defaults";
 
     /// <summary>Keys a KF2_ANALOG* variable set, which the saved settings must
     /// not overwrite — the same precedence the other patches keep.</summary>
@@ -365,7 +360,6 @@ public static class Analog
         // happens inside HostWindow.Initialize -- after Program.cs called Configure.
         Event.AddListener<RuntimeReadyEvent>(_ =>
         {
-            MigrateDefaults();
             Saved(OnKey, ref Enabled);
             Saved(LookKey, ref AnalogLook);
             Saved(MoveKey, ref AnalogMove);
@@ -399,31 +393,6 @@ public static class Analog
             attached = true;
             Attach();
         });
-    }
-
-    /// <summary>
-    /// Bring a saved config to the current defaults once (<see cref="DefaultsVersion"/>):
-    /// a value saved under the old ones was chosen against a stick that already
-    /// turned faster than the D-pad, so it is reset, not kept. Run before the saved
-    /// values are read; a variable set in the environment still wins, as it never
-    /// touched the store.
-    /// </summary>
-    static void MigrateDefaults()
-    {
-        var view = RecompOne.Runtime.Runtime.View;
-        if (view.GetInt(DefaultsKey, 0) >= DefaultsVersion) return;
-
-        int reset = 0;
-        if (view.Has(AccelKey) && view.GetBool(AccelKey, false)) { view.SetBool(AccelKey, false); reset++; }
-        if (view.Has(StopKey) && view.GetBool(StopKey, false)) { view.SetBool(StopKey, false); reset++; }
-        if (view.Has(TurnSensKey) && view.GetFloat(TurnSensKey, 1f) > 1f) { view.SetFloat(TurnSensKey, 1f); reset++; }
-        if (view.Has(PitchSensKey) && view.GetFloat(PitchSensKey, 1f) > 1f) { view.SetFloat(PitchSensKey, 1f); reset++; }
-        if (view.Has(EaseKey) && view.GetBool(EaseKey, false)) { view.SetBool(EaseKey, false); reset++; }
-        view.SetInt(DefaultsKey, DefaultsVersion);
-        RecompOne.Runtime.Runtime.SaveView();
-        if (reset > 0)
-            Console.WriteLine($"[KF2] analog: {reset} saved setting(s) were put back to the current " +
-                              "defaults (Input ▸ Gamepad to change them back)");
     }
 
     static void Attach()

@@ -92,7 +92,7 @@ Save/Discard and the Settings window use the same two persisted keys.
 
 ### Lexeditor integration handoff
 
-The plugin owner should expose the float `kf2.renderdistance` (10.5..30) and bool
+The plugin exposes the float `kf2.renderdistance` (10.5..30) and bool
 `kf2.distancefade.on` (False), using the existing native-settings adapter and shared
 Settings screen. Do not map the checkbox to enhancement distance, even fog, or
 `kf2.fog`. No gameplay mod or new player-library item is required for these native
@@ -120,8 +120,17 @@ and persistence evidence; a larger slider alone is not rendering acceptance.
 Private fixtures explicitly suppress Audio.Initialize and physical input
 initialization before startup, assert no audio device/mixer or input context,
 force a hidden GL window, and use kill-on-close process-tree cleanup. Player
-data is never the fixture. Installed release acceptance must repeat the matched
-captures against the published, pinned archive, not only this source build.
+data is never the fixture.
+
+The published and installed `v0.5.3-lexer.4` archive was checked separately from
+the source build. Its real launcher compiled the private game assembly, and the
+probe's runtime hash matched the installed runtime. The same 15/30 corridor
+captures reproduced the 106/173 halves, 67 beyond15.5, and 12,778 changed pixels.
+At16, toggling fade changed11 pixels with identical camera and geometry selection;
+at24.5 the corridor's images were identical, so those are not visual fade proof.
+A pitched view selected44 actual triangle corners beyond65024 and28 beyond65536,
+with a maximum full view depth of66688.55. The physical65024 cutoff remained
+active with optional fade off, and the capture showed no visible coordinate wrap.
 
 ### Verification
 
@@ -148,24 +157,27 @@ The check opens an ImGui context without any native window and writes only in a
 temporary directory, which it removes. It needs the build's native `cimgui.dll`
 (the project selects win-x64). The actual DistancePage controls were rendered
 offscreen from their ImGui draw lists and inspected. This establishes control
-layout, not how the fade looks in a game scene. GPU-rendered gameplay appearance
-and a delivered installed candidate remain acceptance work; this branch does not
-replace the active installation or modify player saves.
+layout, separately from the game-scene evidence above. Installed preview4's native
+slider, editor Settings/Info and six-step first/rerun setup were rendered and
+inspected. Separate processes restored24.5 with fade both off/on, preserving
+custom controls and unrelated settings. The updater preserved player settings
+and both cards; all probes used private data.
 
 Remaining acceptance:
 
-- The plugin owner's Settings adapter now integrates both keys. Preview
-  v0.5.3-lexer.1 was downloaded through its pinned installer and privately booted.
-- Check the GPU-rendered scene with fade off/on at fixed view distance, then
-  change view distance while holding fade fixed. Check sky, water, models and arm.
+- Physical controller feel and broader gameplay, including water, reflections,
+  sky and arm across other maps, remain player acceptance. The bounded corridor
+  and pitched-view checks above do not establish every renderer configuration.
 - Obtain CI results. On 2026-11-03 the fork's Actions API listed zero workflows
   despite the inherited `ci.yml` existing on `main`; enabling it by filename
   returned HTTP 404. No CI pass is claimed and no remote default branch was pushed.
 
 ## Classic and Modern setup choices
 
-Both first-run launcher setup and the in-game Run Setup use the new Controls
-choice page in onboarding.json version2. Classic uses the exact keyboard layout
+Both first-run launcher setup and the in-game Run Setup put Control layout in
+the existing Controls category in onboarding.json version2, alongside Movement
+and Rumble and gyro. There is no appended Controls page. Both paths traverse six
+numbered steps; Turning and difficulty stays separate. Classic uses the exact keyboard layout
 from upstream15c54b2 and its runtime's ordinary/analog controller tables, with
 separate run disabled. Modern uses this fork's E/Shift keyboard layout, requested
 controller face/trigger/bumper bindings, and separate run. Keep current controls

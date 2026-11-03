@@ -12,7 +12,7 @@ using HostWindow = RecompOne.Runtime.Host.HostWindow;
 namespace Kf2.Remaster;
 
 /// <summary>
-/// The remaster editor, Shift+E. It writes documents only -- never a side table or a
+/// The remaster editor, F2. It writes documents only -- never a side table or a
 /// uniform -- so undo, save and live reload are one operation. Open, it pauses the
 /// world through <see cref="FramePacing.PauseWhen"/> as the full-screen map does;
 /// the renderer keeps drawing, so an edit shows on the frozen scene.
@@ -316,7 +316,7 @@ public static partial class Editor
             if (!e.Pressed || PopupManager.AnyOpen || HotkeyGate.Typing || EditorCamera.Looking) return;
             bool shift = HostWindow.IsKeyDown(Key.ShiftLeft) || HostWindow.IsKeyDown(Key.ShiftRight);
             bool ctrl = HostWindow.IsKeyDown(Key.ControlLeft) || HostWindow.IsKeyDown(Key.ControlRight);
-            if (e.Key == (int)Key.E && shift && !e.Repeat)
+            if (e.Key == (int)Key.F2 && !e.Repeat)
             {
                 bool closing = Panel.Instance.IsOpen;
                 Panel.Instance.IsOpen = !closing;

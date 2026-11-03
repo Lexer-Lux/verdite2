@@ -598,7 +598,7 @@ internal sealed class DebugPanel : IPanel
         ImGui.Separator();
         if (ImGui.BeginTable("##keys", 2, ImGuiTableFlags.SizingStretchProp))
         {
-            Row("F2", "toggle this panel");
+            Row("F10", "toggle this panel");
             Row("F3", "toggle noclip");
             Row("F4", "toggle invincibility");
             Row("F5 / F6", "save / go to bookmark 1");

@@ -205,6 +205,7 @@ Kf2.UiScale.Install();
 // still stock.
 Kf2.KeyLayout.Configure();
 Kf2.KeyLayout.Install();
+Kf2.SeparateRun.Install();
 
 // Host chrome a first run would otherwise inherit from RecompOne: windowed, no
 // FPS overlay, a dark-grey theme, master volume at half. The picture settings

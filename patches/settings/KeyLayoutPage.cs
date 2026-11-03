@@ -35,12 +35,7 @@ public sealed class KeyLayoutPage : IPatchPage
         ImGui.BeginDisabled(applied);
         if (ImGui.Button("King's Field layout")) KeyLayout.Apply();
         ImGui.EndDisabled();
-        // This tooltip described the *superseded* v1 layout until it was caught:
-        // it said "R and F look up and down" and "E uses", while Layout() has
-        // L2 and R2 empty (pitch is the mouse's alone), Space on Square and F on
-        // Cross. The boot line KeyLayout.Install prints was right the whole time,
-        // which is what it was checked against.
-        Tip("W and S walk, A and D strafe, the arrows walk and turn, Space attacks, F uses, " +
+        Tip("W and S walk, A and D strafe, the arrows walk and turn, Space attacks, E uses, Shift runs, " +
             "Q casts and Tab or Escape opens the menu. Looking up and down is the mouse's alone — no keys " +
             "are bound to it. Writes the sixteen bindings in the table below; the arrows keep " +
             "walking, and Escape opens and backs out of the menu, through second bindings the " +

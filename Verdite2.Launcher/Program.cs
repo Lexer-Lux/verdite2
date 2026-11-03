@@ -10,7 +10,7 @@ return Launcher.Run(new LauncherGame
 {
     Name = "Verdite2",
     AppId = "verdite2",
-    GameTitle = "King's Field",
+    GameTitle = "King's Field II — Lexer's fork",
     Serial = "SLUS-00158",
 
     // King's Field II (SLUS-00255) is the game most people will reach for, and it
@@ -27,7 +27,7 @@ return Launcher.Run(new LauncherGame
 
     RecompilerConfig = "kf2.json",
     GameAssembly = "KingsField2",
-    UpdateRepository = "Voicedrew11/verdite2",
+    UpdateRepository = "Lexer-Lux/verdite2",
 
     // OPEN.EXE, or GAME.EXE arriving afresh, is the title; an area module (the
     // attract demo loads one too) or END.EXE is play.

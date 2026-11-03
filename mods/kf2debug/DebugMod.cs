@@ -65,7 +65,7 @@ public sealed class DebugMod : IMod
         _onVSync = _ => RegisterPanel();
         Event.AddListener(_onVSync);
 
-        Console.WriteLine("[kf2debug] loaded; F2 opens the panel, F3 noclip, F4 invincibility");
+        Console.WriteLine("[kf2debug] loaded; F10 opens the panel, F3 noclip, F4 invincibility");
     }
 
     public void OnUnload()
@@ -140,7 +140,7 @@ public sealed class DebugMod : IMod
             DebugPanel.Instance.IsOpen = true;
         }
         ImGui.SameLine();
-        ImGui.TextDisabled("or press F2");
+        ImGui.TextDisabled("or press F10");
 
         ImGui.Separator();
         ImGui.TextWrapped("Settings that persist live here; the switches live in the panel, since "

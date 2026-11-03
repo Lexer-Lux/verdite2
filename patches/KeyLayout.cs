@@ -53,7 +53,7 @@ public static class KeyLayout
     /// schema to grow a field.</summary>
     public const string AppliedKey = "kf2.keys.layout";
 
-    const int Version = 2;
+    const int Version = 3;
 
     /// <summary>
     /// Layouts this port has shipped before and has since changed its mind about.
@@ -72,6 +72,13 @@ public static class KeyLayout
     /// </summary>
     static readonly KeyBindings[] Superseded =
     [
+        new()
+        {
+            Up = "W", Down = "S", L1 = "A", R1 = "D",
+            Left = "Left", Right = "Right", L2 = "", R2 = "",
+            Cross = "F", Square = "Space", Triangle = "Q", Circle = "Tab",
+            Select = "ShiftRight", Start = "Enter", L3 = "", R3 = "",
+        },
         new()
         {
             Up = "W", Down = "S", L1 = "A", R1 = "D",
@@ -108,17 +115,16 @@ public static class KeyLayout
         R2 = "",
 
         // Act. Square swings, so it gets the thumb; Cross is the action button --
-        // doors, levers, the things in front of you -- so it gets F, where thirty
-        // years of first-person games have put "use". Q casts.
+        // doors, levers, the things in front of you -- on E. Q casts.
         Square = "Space",
-        Cross = "F",
+        Cross = "E",
         Triangle = "Q",
         Circle = "Tab",
         Select = "ShiftRight",
         Start = "Enter",
 
-        // The game reads neither.
-        L3 = "",
+        // SeparateRun consumes L3 only in the gameplay run check.
+        L3 = "ShiftLeft",
         R3 = "",
     };
 
@@ -132,7 +138,7 @@ public static class KeyLayout
         KeyLayoutApply.Configure(Layout, Version, Superseded, Announce, GetApplied, SetApplied);
 
     const string Announce = "WASD layout applied (W/S walk, A/D strafe, arrows walk and turn, " +
-                            "Space attack, F use, Q cast, Tab or Escape menu). Input settings has both layouts.";
+                            "Space attack, E use, Q cast, Shift run, Tab or Escape menu). Input settings has both layouts.";
 
     /// <summary>
     /// Migrate an existing settings.json, once, and only if nothing in it was

@@ -36,7 +36,7 @@ internal static class Hotkeys
 {
     internal static bool Enabled = true;
 
-    internal static Key TogglePanel   = Key.F2;
+    internal static Key TogglePanel   = Key.F10;
     internal static Key ToggleNoclip  = Key.F3;
     internal static Key ToggleGodMode = Key.F4;
     internal static Key SaveBookmark  = Key.F5;

@@ -135,6 +135,12 @@ public sealed class InputSection : ISettingsSection
 
     public void Draw()
     {
+        if (ImGui.Checkbox(Localization.T("kf2.controls.separaterun"), ref SeparateRun.Enabled))
+            PatchSettings.Set(SeparateRun.Setting, SeparateRun.Enabled);
+        BindingActions["L3"] = SeparateRun.Enabled
+            ? Localization.T("kf2.controls.run") : "(the game does not read it)";
+        BindingActions["Circle"] = SeparateRun.Enabled
+            ? Localization.T("kf2.controls.menu") : "the in-game menu";
         if (!ImGui.BeginTabBar("##kf2-input")) return;
 
         Tab(Localization.T("settings.input.keyboard"), DrawKeyboard);
@@ -196,6 +202,11 @@ public sealed class InputSection : ISettingsSection
 
     void DrawGamepad()
     {
+        if (ImGui.Button(Localization.T("kf2.controls.padlayout")))
+        {
+            SeparateRun.ApplyPadLayout();
+            _padRow = -1;
+        }
         // Above the pages, not below the table where the runtime had it: this is
         // the answer to "why is none of this doing anything", so it has to be met
         // before the twin-stick block rather than after the sixteen rows.
@@ -215,12 +226,10 @@ public sealed class InputSection : ISettingsSection
 
         ImGui.Spacing();
 
-        // Nothing migrates pad bindings, so this is the plain reset the runtime
-        // had. Pad2 is deliberately left alone — see BindingTable.
+        // Reset to this fork's defaults. Pad2 is deliberately left alone.
         if (ImGui.Button(Localization.T("settings.input.reset_defaults")))
         {
-            ConfigManager.Game.Pad = new GamepadBindings();
-            ConfigManager.SaveGame();
+            SeparateRun.ApplyPadLayout();
             _padRow = -1;
         }
     }

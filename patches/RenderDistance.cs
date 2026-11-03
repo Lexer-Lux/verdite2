@@ -15,8 +15,8 @@ namespace Kf2;
 ///
 /// The game's own grid is left exactly as it built it. Past its cone the port adds
 /// cells of its own: inside the cone's side lines carried out to <see cref="Tiles"/>,
-/// lit only where a neighbour nearer the camera is lit and the eye's level has a
-/// half there, so the game's flood is continued outward rather than replaced. They
+/// lit only where a nearer neighbour has the same half lit and that half exists,
+/// so each of the game's visibility layers continues independently. They
 /// are drawn by <see cref="TileWalk"/> after the game's cells, through the far
 /// assembler, and <see cref="ModelWalk"/>'s visibility queries answer for them.
 ///
@@ -121,17 +121,6 @@ public static class RenderDistance
         uint originX = mem.ReadU32(GridOriginX);
         int originZ = (int)mem.ReadU32(GridOriginZ);
 
-        // The eye's level is the bit the game's flood lit most of.
-        int lower = 0, upper = 0;
-        for (uint i = 0; i < 24 * 24; i++)
-        {
-            uint b = mem.ReadU8(Grid + i);
-            lower += (int)(b & 1u);
-            upper += (int)((b >> 1) & 1u);
-        }
-        byte marker = upper > lower ? (byte)2 : (byte)1;
-        uint halfOff = marker == 2 ? 5u : 0u;
-
         foreach (var (dx, dz) in _order)
         {
             int bi = (dz + Reach) * Side + dx + Reach;
@@ -157,14 +146,16 @@ public static class RenderDistance
             if (sz != 0) parents |= _box[bi + sz * Side];
             if (sx != 0 && sz != 0) parents |= _box[bi + sz * Side + sx];
 
-            byte v = (parents & marker) != 0
-                     && mem.ReadU8(MapBase + (uint)tz * 800u + (uint)tx * 10u + halfOff) != 0xFF ? marker : (byte)0;
-            _box[bi] = (byte)(stock | v);
-            if (v != 0 && stock == 0)
+            uint address = MapBase + (uint)tz * 800u + (uint)tx * 10u;
+            byte extra = 0;
+            if ((parents & 1) != 0 && (stock & 1) == 0 && mem.ReadU8(address) != 0xFF) extra |= 1;
+            if ((parents & 2) != 0 && (stock & 2) == 0 && mem.ReadU8(address + 5u) != 0xFF) extra |= 2;
+            _box[bi] = (byte)(stock | extra);
+            if (extra != 0)
             {
                 if (_map) _glyph[bi] = '+';
                 int ti = tz * 80 + tx;
-                _far[ti] = v;
+                _far[ti] = extra;
                 _cells.Add(ti);
             }
         }

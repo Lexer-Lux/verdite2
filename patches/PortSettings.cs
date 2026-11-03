@@ -243,17 +243,22 @@ public static class PortSettings
 
     // ---- World ----
 
-    /// <summary>The game's far edge, the one the game draws to, and the most the
-    /// setting reaches. ENHANCED is the furthest a tile can be placed (see
-    /// <see cref="RenderDistance"/>), which is what the mechanism was measured at.</summary>
+    /// <summary>The native geometry range, in half-tile steps. The window also
+    /// accepts numbers between the steps without rounding them on opening.</summary>
     public static readonly PortSetting RenderDist = new()
     {
-        Key = RenderDistance.Key, Envs = ["KF2_RENDERDIST"], Label = "Render distance",
-        Page = World, MenuLabel = "RENDER DISTANCE", Steps = [RenderDistance.Stock, RenderDistance.Max],
-        MenuValue = v => Math.Abs(v - RenderDistance.Stock) < .01 ? "ORIGINAL" : Math.Abs(v - RenderDistance.Max) < .01 ? "ENHANCED" : Number(v),
+        Key = RenderDistance.Key, Envs = ["KF2_RENDERDIST"], Label = "View distance (tiles)",
+        Page = World, MenuLabel = "VIEW DISTANCE",
+        Steps = Enumerable.Range(0, (int)((RenderDistance.Max - RenderDistance.Stock) * 2) + 1)
+            .Select(i => (double)RenderDistance.Stock + i * .5).ToArray(),
+        MenuValue = v => Number(v),
         Default = RenderDistance.Stock, Live = () => RenderDistance.Tiles, Apply = v => RenderDistance.Set((float)v),
         Stored = Stored.Float, Ui = Ui.None,
     };
+
+    public static readonly PortSetting SmoothDistanceFade = Switch(ViewDistanceFade.Key,
+        "KF2_DISTANCEFADE", "Smooth distance fade", World, "SMOOTH DIST FADE",
+        () => ViewDistanceFade.Enabled, ViewDistanceFade.Set, ViewDistanceFade.Default);
 
     /// <summary>The fog's distance cue (<see cref="Fog"/>): at the corners, by pixel
     /// depth, or by distance from the eye (the default). Applied at boot by Fog itself.</summary>
@@ -455,7 +460,7 @@ public static class PortSettings
     [
         Display, Resolution, Aspect, HudAnchor, FrameRateRow,
         TextureFilter, PerPixel, AmbientOcclusionRow, ShadingRow,
-        RenderDist, FogMode, Water,
+        RenderDist, SmoothDistanceFade, FogMode, Water,
         AutoReloadOn, GearCompareOn, EnemyTurnSpeed,
         ControlsRow, InvertedCamera, StickSens, MouseSens, Gyro, RumbleRow,
         Positional,
@@ -467,7 +472,7 @@ public static class PortSettings
     [
         Display, Resolution, Aspect, HudAnchor, FrameRate, Smoothing,
         Mipmaps, Anisotropy, PerPixel, Ao, AoQuality, NoDitherOn, TrueColorOn,
-        RenderDist, FogMode, MurkyWater, WaterWaves, Planar,
+        RenderDist, SmoothDistanceFade, FogMode, MurkyWater, WaterWaves, Planar,
         AutoReloadOn, GearCompareOn, EnemyTurnSpeed, FocusPauseOn,
         Controls, StickAccel, InvertedCamera, StickTurn, StickLook, MouseTurn, MouseLookSens, ItemTurnOn, ItemTurnGyro, GyroAimOn, RumbleOn, RumbleHd,
         Positional,

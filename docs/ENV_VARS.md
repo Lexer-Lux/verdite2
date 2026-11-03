@@ -100,6 +100,7 @@ KF2_WIDESCREEN_CULL_PROBE=1              # tiles lit, and what the 24x24 grid cl
 KF2_WIDESCREEN_CULL_PROBE=2              # also lit-per-ring after the occlusion flood
 KF2_WIDESCREEN_CULL_PROBE=3              # also rebuild the stock grid each frame: stock tiles missing from the widened one (must be 0)
 KF2_RENDERDIST=13.5                      # draw the map past the game's 24x24 window, to this many tiles (10.5, the game's, is off; 15 at most)
+KF2_DISTANCEFADE=1                       # smooth GPU main-view scenery over the last tile of horizontal distance; independent of geometry reach and atmospheric fog (off by default)
 KF2_RENDERDIST_PROBE=1                   # a line every 2 s: cells added, walked, model queries let through, packets clamped to the table's end; =2 adds the grid round the camera as ASCII
 KF2_PRIMBUF=1                            # the game's primitive buffers where it put them (moved above 2 MB, 4x as large, by default; =N for N x)
 KF2_PRIMBUF_PROBE=1                      # the frame's primitive budget: peak, capacity, overflows

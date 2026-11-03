@@ -233,6 +233,7 @@ public static class GpuWorld
         Active = ActiveNow;
         RetainedScene.MainView = Active;
         RetainedScene.MainSerial = Active ? RetainedScene.Serial : 0;
+        ViewDistanceFade.AtFrame();
         WaterActive = Active && _water && BlendOrder.Active;
         ModelsActive = ModelsNow(Active);
         RetainedScene.MainWater = WaterActive;

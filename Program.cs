@@ -1345,6 +1345,8 @@ Kf2.CullGrid.Install();
 Kf2.RenderDistance.Configure(Environment.GetEnvironmentVariable("KF2_RENDERDIST"),
                              Environment.GetEnvironmentVariable("KF2_RENDERDIST_PROBE"));
 Kf2.RenderDistance.Install();
+Kf2.ViewDistanceFade.Configure(Environment.GetEnvironmentVariable("KF2_DISTANCEFADE"));
+Kf2.ViewDistanceFade.Install();
 
 // How far the enhancements reach; past it the game's own look (0083).
 //

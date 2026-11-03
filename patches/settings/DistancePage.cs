@@ -17,19 +17,24 @@ public sealed class DistancePage : IPatchPage
     {
       "strings": {
         "kf2.renderdistance.label": {
-          "en": "Render distance",
-          "pt-BR": "Distância de renderização",
-          "es-419": "Distancia de dibujado"
+          "en": "View distance (tiles)",
+          "pt-BR": "Distância de visão (ladrilhos)",
+          "es-419": "Distancia de visión (baldosas)"
         },
         "kf2.renderdistance.tooltip": {
-          "en": "How far ahead the map is drawn, in floor tiles. The game stops at 10.5; past it the map is drawn further, up to 15, and the reflections see it too. The game's fog is unchanged, so in a fogged area what is added is drawn in the dark. Experimental.",
-          "pt-BR": "Até onde o mapa é desenhado à frente, em ladrilhos do piso. O jogo para em 10,5; além disso o mapa é desenhado mais longe, até 15, e os reflexos também o veem. A neblina do jogo não muda, então numa área com neblina o que é acrescentado é desenhado no escuro. Experimental.",
-          "es-419": "Hasta dónde se dibuja el mapa hacia adelante, en baldosas del piso. El juego se detiene en 10,5; más allá el mapa se dibuja más lejos, hasta 15, y los reflejos también lo ven. La niebla del juego no cambia, así que en un área con niebla lo agregado se dibuja en la oscuridad. Experimental."
+          "en": "Draws the map further ahead. The game supports 10.5 to 15. Fog can still hide distant scenery.",
+          "pt-BR": "Desenha o mapa mais à frente. O jogo permite de 10,5 a 15. A neblina ainda pode ocultar o cenário distante.",
+          "es-419": "Dibuja el mapa más adelante. El juego permite de 10,5 a 15. La niebla todavía puede ocultar el escenario distante."
         },
-        "kf2.renderdistance.game": {
-          "en": "The game's",
-          "pt-BR": "A do jogo",
-          "es-419": "La del juego"
+        "kf2.distancefade.label": {
+          "en": "Smooth distance fade",
+          "pt-BR": "Transição suave de distância",
+          "es-419": "Transición suave de distancia"
+        },
+        "kf2.distancefade.tooltip": {
+          "en": "Gradually hides scenery near the view limit. Requires GPU geometry. Keeps fog and view distance unchanged.",
+          "pt-BR": "Oculta gradualmente o cenário perto do limite de visão. Requer geometria na GPU. Mantém a neblina e a distância de visão.",
+          "es-419": "Oculta gradualmente el escenario cerca del límite de visión. Requiere geometría en GPU. Mantiene la niebla y la distancia de visión."
         },
         "kf2.enhancedistance.label": {
           "en": "Enhancement distance",
@@ -57,14 +62,21 @@ public sealed class DistancePage : IPatchPage
         var flags = ImGuiSliderFlags.AlwaysClamp;
 
         float reach = RenderDistance.Tiles;
-        string rf = RenderDistance.On ? "%.1f" : Escape(Localization.T("kf2.renderdistance.game"));
         if (ImGui.SliderFloat(Localization.T("kf2.renderdistance.label"), ref reach,
-                              RenderDistance.Stock, RenderDistance.Max, rf, flags))
+                              RenderDistance.Stock, RenderDistance.Max, "%.1f", flags))
         {
             RenderDistance.Set(reach);
             PatchSettings.Set(RenderDistance.Key, RenderDistance.Tiles);
         }
         if (ImGui.IsItemHovered()) ImGui.SetTooltip(Localization.T("kf2.renderdistance.tooltip"));
+
+        bool fade = ViewDistanceFade.Enabled;
+        if (ImGui.Checkbox(Localization.T("kf2.distancefade.label"), ref fade))
+        {
+            ViewDistanceFade.Set(fade);
+            PatchSettings.Set(ViewDistanceFade.Key, fade);
+        }
+        if (ImGui.IsItemHovered()) ImGui.SetTooltip(Localization.T("kf2.distancefade.tooltip"));
 
         float plain = EnhancementDistance.Tiles > 0f ? EnhancementDistance.Tiles : EnhancementDistance.Max;
         string pf = EnhancementDistance.Tiles > 0f ? "%.1f" : Escape(Localization.T("kf2.enhancedistance.all"));

@@ -83,7 +83,8 @@ HUD to OFF, pointing at row 1 moved it back, a click at (5,230) opened the quest
 | | PER-PIXEL LIGHT | OFF, ON | `kf2.perpixel.on` |
 | | AMB. OCCLUSION | OFF, LOW, MEDIUM, HIGH | `kf2.ao.on` and `kf2.ao.quality` |
 | | SHADING | DITHER, NONE, SMOOTH | `kf2.nodither.on` and `kf2.truecolor.on`, true color the master, as `ShadingPage` |
-| WORLD | RENDER DISTANCE | ORIGINAL, ENHANCED | `kf2.renderdistance`: 10.5 tiles (off) or 15 (its maximum; not judged) |
+| WORLD | VIEW DISTANCE | 10.5 … 15, half-tile steps | `kf2.renderdistance`: native geometry reach, retaining fractional saved values between steps |
+| | SMOOTH DIST FADE | OFF, ON | `kf2.distancefade.on`: optional GPU main-view distance transition, independent of geometry reach, fog and enhancement distance; off by default |
 | | FOG | CORNERS, PIXEL DEPTH, DISTANCE | `kf2.fog`: the game's fog at the corners, by pixel depth, or by distance from the eye (the default since 2026-10-09; a kept `kf2.fog` still wins) (`KF2_FOG`; RENDERING, "Fog by distance from the eye") |
 | | WATER | ORIGINAL, ENHANCED, FULL | `kf2.murk.on`, `kf2.waves.on`, `kf2.ssr.planar`: ENHANCED murk and waves, FULL the planar reflection too (the default) |
 | GAMEPLAY | RELOAD ON DEATH | OFF, ON | `kf2.autoreload.enabled` |

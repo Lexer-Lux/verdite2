@@ -73,7 +73,7 @@ public static class RenderDistance
     {
         if (float.TryParse(tiles, System.Globalization.NumberStyles.Float,
                            System.Globalization.CultureInfo.InvariantCulture, out float t))
-            _forced = Math.Clamp(t, Stock, Max);
+            _forced = Normalize(t);
         _probe = probe is not (null or "" or "0");
         _map = probe == "2";
     }
@@ -82,12 +82,14 @@ public static class RenderDistance
     {
         Event.AddListener<RuntimeReadyEvent>(_ =>
         {
-            Tiles = _forced ?? Math.Clamp(RecompOne.Runtime.Runtime.View.GetFloat(Key, Stock), Stock, Max);
+            Set(_forced ?? RecompOne.Runtime.Runtime.View.GetFloat(Key, Stock));
             Console.WriteLine($"[KF2] render distance: {(On ? $"{Tiles:0.#} tiles" : "the game's")}");
         });
     }
 
-    public static void Set(float tiles) => Tiles = Math.Clamp(tiles, Stock, Max);
+    static float Normalize(float tiles) => float.IsFinite(tiles) ? Math.Clamp(tiles, Stock, Max) : Stock;
+
+    public static void Set(float tiles) => Tiles = Normalize(tiles);
 
     static (int, int)[] BuildOrder()
     {

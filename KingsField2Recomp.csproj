@@ -79,6 +79,7 @@
     -->
     <ItemGroup>
         <Compile Remove="mcp/**" />
+        <Compile Remove="tests/**" />
         <EmbeddedResource Remove="mcp/**" />
         <None Remove="mcp/**" />
     </ItemGroup>

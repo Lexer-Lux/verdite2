@@ -199,6 +199,17 @@ on the first returns to the display. Every group has three tiers:
   View group), and the turning page's twin sticks with acceleration. The remaster
   packs stay off, as they ship; murky water is off in every tier and by default.
 
+The existing **Controls** category includes **Control layout**, alongside its
+original Movement and Rumble/gyro groups. Its selector offers Classic Controls
+and Modern Controls; the Original and Original++ tiers share Classic, so they
+appear as one option. A consumed layout request matches neither explicit preset,
+and the existing selector's **Keep as is** preserves current keyboard/controller
+bindings. Keep omits the request key entirely. Classic/Modern are one-shot
+requests, so later custom bindings, sensitivity and unrelated settings survive.
+There is no separate bindings choice page. First-run and rerun both navigate
+Display → Controls → Presentation → Gameplay → Turning and difficulty → Summary:
+six numbered steps after Welcome, with Controls appearing once.
+
 After the tiers comes **the turning page** (`pages` in the spec, `"id": "turning"`),
 before the summary. It asks how the player turns, and how fast the creatures turn
 toward them: three options (tank controls, twin stick, and twin stick with

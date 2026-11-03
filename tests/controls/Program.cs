@@ -39,10 +39,70 @@ try
     var core = typeof(KeyLayout).Assembly.GetType("Verdite.Core.Onboarding")!;
     var spec = core.GetMethod("Load")!.Invoke(null, ["KF2", new string[] { args[0] }])!;
     Check(spec != null, "shared setup specification loads");
+    var categories = ((System.Collections.IEnumerable)spec!.GetType().GetProperty("Categories")!.GetValue(spec)!).Cast<object>().ToArray();
+    string Id(object value) => (string)value.GetType().GetProperty("Id")!.GetValue(value)!;
+    var controls = categories.Single(c => Id(c) == "controls");
+    var groups = ((System.Collections.IEnumerable)controls.GetType().GetProperty("Groups")!.GetValue(controls)!).Cast<object>().ToArray();
+    Check(groups.Select(Id).SequenceEqual(new[] {"bindings", "movement", "haptics"}),
+        "existing Controls page retains Movement and Rumble/gyro beside Control layout");
+    var choicePages = ((System.Collections.IEnumerable)spec.GetType().GetProperty("Pages")!.GetValue(spec)!).Cast<object>().ToArray();
+    Check(choicePages.Select(Id).SequenceEqual(new[] {"turning"}), "obsolete extra Controls page is removed; Turning/difficulty remains");
+    var bindingTiers = ((System.Collections.IEnumerable)groups[0].GetType().GetProperty("Tiers")!.GetValue(groups[0])!).Cast<object>().ToArray();
+    Check(bindingTiers.Length == 3 && bindingTiers.Select(t =>
+        ((Dictionary<string,string?>)t.GetType().GetProperty("Set")!.GetValue(t)!)[ControlProfiles.Key]).SequenceEqual(new[] {"1", "1", "2"}),
+        "Original and Balanced choose Classic; Modern chooses Modern through the existing tier mechanism");
+    Check((int)core.GetMethods().Single(m => m.Name == "Detect" && m.GetParameters()[1].ParameterType == groups[0].GetType())
+        .Invoke(null, [spec, groups[0]])! == -1, "consumed profile request selects Keep as is on a new setup run");
+
+    // Exercise the real popup's first-run and rerun state machine. It renders no
+    // window and never advances past Summary into Finish or applies a preset.
+    core.GetField("_monitorRead", BindingFlags.NonPublic | BindingFlags.Static)!.SetValue(null, true);
+    core.GetField("_monitor", BindingFlags.NonPublic | BindingFlags.Static)!.SetValue(null, (1280, 720));
+    var popupType = typeof(Setup).Assembly.GetType("Verdite.Core.OnboardingPopup")!;
+    var savedValues = new Dictionary<string,string>(Runtime.View.Values);
+    foreach (bool rerun in new[] {false, true})
+    {
+        Runtime.View.Values.Clear();
+        if (rerun) foreach (var pair in savedValues) Runtime.View.Values[pair.Key] = pair.Value;
+        var popup = (RecompOne.Runtime.Host.Window.Popup)Activator.CreateInstance(popupType,
+            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, [spec, "KF2", rerun], null)!;
+        popup.Open();
+        var pageField = popupType.GetField("_page", BindingFlags.NonPublic | BindingFlags.Instance)!;
+        popupType.GetMethod("Go", BindingFlags.NonPublic | BindingFlags.Instance)!.Invoke(popup, [Enum.Parse(pageField.FieldType, "Display")]);
+        var sequence = new List<string> {"welcome"};
+        while (true)
+        {
+            string pageName = pageField.GetValue(popup)!.ToString()!;
+            string pageId = pageName switch
+            {
+                "Tiers" => Id(categories[(int)popupType.GetField("_catAt", BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(popup)!]),
+                "Choice" => Id(choicePages[(int)popupType.GetField("_pageAt", BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(popup)!]),
+                _ => pageName.ToLowerInvariant(),
+            };
+            sequence.Add(pageId);
+            if (pageName == "Summary") break;
+            if (sequence.Count > 12) throw new Exception("Setup navigation did not reach Summary");
+            popupType.GetMethod("Forward", BindingFlags.NonPublic | BindingFlags.Instance)!.Invoke(popup, null);
+        }
+        Check(sequence.SequenceEqual(new[] {"welcome", "display", "controls", "presentation", "gameplay", "turning", "summary"}),
+            $"{(rerun ? "rerun" : "first-run")} actual page order ({sequence.Count - 1} steps): {string.Join(" -> ", sequence)}");
+        popup.Close();
+    }
+    Runtime.View.Values.Clear();
+    foreach (var pair in savedValues) Runtime.View.Values[pair.Key] = pair.Value;
+
     var apply = typeof(Setup).GetMethod("Apply", BindingFlags.NonPublic | BindingFlags.Static)!;
     core.GetProperty("LiveApply")!.SetValue(null, apply.CreateDelegate<Func<string, string?, bool>>());
-    void Choose(int profile) => core.GetMethod("Apply")!.Invoke(null,
-        [spec, new List<Dictionary<string,string?>> { new() { [ControlProfiles.Key] = profile == 0 ? null : profile.ToString() } }, "KF2"]);
+    object BindingSets(int profile)
+    {
+        var tiers = categories.Select(cat => Enumerable.Repeat(-1,
+            ((System.Collections.ICollection)cat.GetType().GetProperty("Groups")!.GetValue(cat)!).Count).ToArray()).ToArray();
+        if (profile != 0) tiers[Array.IndexOf(categories, controls)][0] = profile == 1 ? 0 : 2;
+        return core.GetMethod("Sets")!.Invoke(null, [spec, Array.Empty<int>(), tiers, null])!;
+    }
+    Check(!((IEnumerable<Dictionary<string,string?>>)BindingSets(0)).Any(set => set.ContainsKey(ControlProfiles.Key)),
+        "Keep current controls omits the one-shot request instead of reapplying bindings");
+    void Choose(int profile) => core.GetMethod("Apply")!.Invoke(null, [spec, BindingSets(profile), "KF2"]);
 
     ConfigManager.Game.Keys.Cross = "R";
     ConfigManager.Game.Pad.Square = [2, 10];
@@ -81,6 +141,19 @@ try
     Check(Analog.TurnSens == 2.25f && Analog.PitchSens == 1.75f && Analog.StickEase && EnemyTurn.Multiplier == 1.5f,
         "legacy config preserves custom sensitivities and enemy turn");
     Check(File.ReadAllText("interface.ini") == customView, "startup does not rewrite saved native preferences");
+    ConfigManager.Game.MasterVolume = 0.13f;
+    ConfigManager.Game.CardAPath = Path.Combine(scratch, "untouched-card.sav");
+    ConfigManager.Game.Pad2.Triangle = [15];
+    Runtime.View.Values["unrelated.preview.setting"] = "preserve";
+    foreach (int profile in new[] {1, 2})
+    {
+        Choose(profile);
+        Check(Analog.TurnSens == 2.25f && Analog.PitchSens == 1.75f && EnemyTurn.Multiplier == 1.5f && Analog.StickEase,
+            $"Controls category preset {profile} preserves custom sensitivity and enemy-turn settings");
+        Check(ConfigManager.Game.MasterVolume == 0.13f && ConfigManager.Game.Pad2.Triangle.SequenceEqual(new[] {15}) &&
+              ConfigManager.Game.CardAPath == Path.Combine(scratch, "untouched-card.sav") && Runtime.View.Values["unrelated.preview.setting"] == "preserve",
+            $"Controls category preset {profile} preserves audio, card path, second player and unrelated preferences");
+    }
 
     // Exercise the original recompiled routines in private RAM, not a formula mock.
     Verdite.Core.Game.Configure(tag: "KF2");

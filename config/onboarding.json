@@ -289,6 +289,33 @@
       "label": "kf2.setup.controls",
       "groups": [
         {
+          "id": "bindings",
+          "label": "kf2.setup.bindings.layout",
+          "tiers": [
+            {
+              "label": "kf2.setup.bindings.classic",
+              "desc": "kf2.setup.bindings.classic.desc",
+              "set": {
+                "kf2.controls.profile": "1"
+              }
+            },
+            {
+              "label": "kf2.setup.bindings.classic",
+              "desc": "kf2.setup.bindings.classic.desc",
+              "set": {
+                "kf2.controls.profile": "1"
+              }
+            },
+            {
+              "label": "kf2.setup.bindings.modern",
+              "desc": "kf2.setup.bindings.modern.desc",
+              "set": {
+                "kf2.controls.profile": "2"
+              }
+            }
+          ]
+        },
+        {
           "id": "movement",
           "label": "kf2.setup.movement",
           "tiers": [
@@ -640,48 +667,6 @@
     }
   ],
   "pages": [
-    {
-      "id": "bindings",
-      "title": "kf2.setup.bindings",
-      "body": [
-        "kf2.setup.bindings.body"
-      ],
-      "label": "kf2.setup.bindings.layout",
-      "options": [
-        {
-          "label": "kf2.setup.bindings.keep",
-          "desc": "kf2.setup.bindings.keep.desc",
-          "set": {
-            "kf2.controls.profile": null
-          }
-        },
-        {
-          "label": "kf2.setup.bindings.classic",
-          "desc": "kf2.setup.bindings.classic.desc",
-          "set": {
-            "kf2.controls.profile": "1"
-          }
-        },
-        {
-          "label": "kf2.setup.bindings.modern",
-          "desc": "kf2.setup.bindings.modern.desc",
-          "set": {
-            "kf2.controls.profile": "2"
-          }
-        }
-      ],
-      "presets": [
-        {
-          "option": 0
-        },
-        {
-          "option": 0
-        },
-        {
-          "option": 0
-        }
-      ]
-    },
     {
       "id": "turning",
       "title": "kf2.setup.turning",
@@ -1223,30 +1208,10 @@
       "pt-BR": "Recarregar último save",
       "es-419": "Recargar último guardado"
     },
-    "kf2.setup.bindings": {
-      "en": "Controls",
-      "pt-BR": "Controles",
-      "es-419": "Controles"
-    },
-    "kf2.setup.bindings.body": {
-      "en": "Choose a control layout, or keep your current bindings. Choosing Classic or Modern replaces keyboard and controller bindings; later custom changes are preserved on startup.",
-      "pt-BR": "Escolha um esquema ou mantenha suas teclas atuais. Clássico ou Moderno substitui os comandos do teclado e controle; mudanças posteriores são preservadas ao iniciar.",
-      "es-419": "Elige un esquema o conserva tus controles actuales. Clásico o Moderno reemplaza las asignaciones de teclado y mando; los cambios posteriores se conservan al iniciar."
-    },
     "kf2.setup.bindings.layout": {
       "en": "Control layout",
       "pt-BR": "Esquema de controle",
       "es-419": "Esquema de controles"
-    },
-    "kf2.setup.bindings.keep": {
-      "en": "Keep current controls",
-      "pt-BR": "Manter controles atuais",
-      "es-419": "Conservar controles actuales"
-    },
-    "kf2.setup.bindings.keep.desc": {
-      "en": "Keep custom keyboard and controller bindings.",
-      "pt-BR": "Mantém seus comandos personalizados de teclado e controle.",
-      "es-419": "Conserva tus asignaciones de teclado y mando."
     },
     "kf2.setup.bindings.classic": {
       "en": "Classic Controls",

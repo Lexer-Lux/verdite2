@@ -123,10 +123,65 @@ replace the active installation or modify player saves.
 
 Remaining acceptance:
 
-- Integrate the two keys through the plugin owner's shared Settings adapter.
-- Build and deliver the fork through that owner's installation path.
+- The plugin owner's Settings adapter now integrates both keys. Preview
+  v0.5.3-lexer.1 was downloaded through its pinned installer and privately booted.
 - Check the GPU-rendered scene with fade off/on at fixed view distance, then
   change view distance while holding fade fixed. Check sky, water, models and arm.
 - Obtain CI results. On 2026-11-03 the fork's Actions API listed zero workflows
   despite the inherited `ci.yml` existing on `main`; enabling it by filename
   returned HTTP 404. No CI pass is claimed and no remote default branch was pushed.
+
+## Classic and Modern setup choices
+
+Both first-run launcher setup and the in-game Run Setup use the new Controls
+choice page in onboarding.json version2. Classic uses the exact keyboard layout
+from upstream15c54b2 and its runtime's ordinary/analog controller tables, with
+separate run disabled. Modern uses this fork's E/Shift keyboard layout, requested
+controller face/trigger/bumper bindings, and separate run. Keep current controls
+does not replace customized bindings.
+
+A setup choice queues kf2.controls.profile (1 Classic,2 Modern), then the game
+consumes it. It is a request, not a second ongoing binding configuration. Thus
+selecting the same preset again deliberately resets later custom bindings, while
+ordinary startups preserve them. Existing one-time binding migrations still
+recognize known defaults only. Classic and Modern both retain the native menu's
+Escape and extra Up/Down inputs; compatible secondary layouts do not broaden
+migration recognition. F2 remains the editor hotkey.
+
+The isolated tests/controls/ControlsCheck.csproj check uses the real shared
+Onboarding.Apply and native Setup live setter. It measured first-run Classic,
+both upstream controller tables, preset consumption, reselecting the same preset,
+Keep after Classic, Modern bindings/separate run, custom binding preservation and
+disk reload. It creates no native window and opens no disc or player data:
+
+```powershell
+dotnet run --project tests/controls/ControlsCheck.csproj -c Release `
+  --artifacts-path $env:TEMP/lexeditor-dev/kf2-controls/check `
+  -p:GameBuild=ABSOLUTE_PRIVATE_GAME_BUILD_DIRECTORY -- `
+  ABSOLUTE_SOURCE_DIRECTORY/config/onboarding.json
+```
+
+## Native notification API for source mods
+
+NativeNotifications.Post(owner,glyphs), PostText(owner,text), Flush(cpu,memory)
+and Cancel(owner) let independent source mods share the original eight-slot
+feedback queue. The API calls native enqueue80033F08 and original font80021E10;
+it uses the native toast's location, brightness and lifetime rather than an
+ImGui message overlay. Pending messages are capped at512, each text at24glyphs.
+Original item-name glyph bytes support the game's font; PostText accepts A-Z and
+spaces for English status messages.
+
+IDs232..239 correspond to queue slots because the native controller coalesces
+equal consecutive IDs. Cancel compacts the queue, preserving other owners and
+vanilla IDs/coin amounts, and cancels its own active fade. Load resets custom
+messages. Call Cancel during a source mod's OnUnload. No mod-specific gameplay
+policy lives in this API: Better UI posts names and Better Poison owns poison
+transitions/settings as independently enabled user-library mods.
+
+Private direct native checks measured queue ordering, owner-scoped cancellation,
+coin preservation, eight original-font glyph packets and native brightness, CPU
+stack restoration and both source mods compiling through the real ModCompiler.
+A private headless source-fork boot loaded Better UI and Better Poison, committed
+their1/7hooks and the API hooks, displayed POISONED/POISON CURED through the actual
+font routine, and measured a green poison wash. No player data or live session
+was changed. GPU appearance remains a human check.

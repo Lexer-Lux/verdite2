@@ -72,13 +72,7 @@ public static class KeyLayout
     /// </summary>
     static readonly KeyBindings[] Superseded =
     [
-        new()
-        {
-            Up = "W", Down = "S", L1 = "A", R1 = "D",
-            Left = "Left", Right = "Right", L2 = "", R2 = "",
-            Cross = "F", Square = "Space", Triangle = "Q", Circle = "Tab",
-            Select = "ShiftRight", Start = "Enter", L3 = "", R3 = "",
-        },
+        ClassicLayout(),
         new()
         {
             Up = "W", Down = "S", L1 = "A", R1 = "D",
@@ -87,6 +81,15 @@ public static class KeyLayout
             Select = "ShiftRight", Start = "Enter", L3 = "", R3 = "",
         },
     ];
+
+    /// <summary>Exact keyboard defaults from upstream 15c54b2, before this fork's changes.</summary>
+    public static KeyBindings ClassicLayout() => new()
+    {
+        Up = "W", Down = "S", L1 = "A", R1 = "D",
+        Left = "Left", Right = "Right", L2 = "", R2 = "",
+        Cross = "F", Square = "Space", Triangle = "Q", Circle = "Tab",
+        Select = "ShiftRight", Start = "Enter", L3 = "", R3 = "",
+    };
 
     /// <summary>
     /// W A S D and the rest. Only the sixteen pad buttons exist, so this says
@@ -135,7 +138,8 @@ public static class KeyLayout
     /// is precisely the behaviour a default wants.
     /// </summary>
     public static void Configure() =>
-        KeyLayoutApply.Configure(Layout, Version, Superseded, Announce, GetApplied, SetApplied);
+        KeyLayoutApply.Configure(Layout, Version, Superseded, Announce, GetApplied, SetApplied,
+            secondaryLayouts: [ClassicLayout()]);
 
     const string Announce = "WASD layout applied (W/S walk, A/D strafe, arrows walk and turn, " +
                             "Space attack, E use, Q cast, Shift run, Tab or Escape menu). Input settings has both layouts.";
@@ -217,6 +221,13 @@ public static class KeyLayout
 
     /// <summary>Write the layout and save it. What the settings button calls.</summary>
     public static void Apply() => KeyLayoutApply.Apply();
+
+    internal static void ApplyChoice(bool modern)
+    {
+        ConfigManager.Game.Keys = modern ? Layout() : ClassicLayout();
+        ConfigManager.SaveGame();
+        SetApplied(Version);
+    }
 
     /// <summary>Back to RecompOne's own scheme, and remember that it was asked
     /// for, so the migration above does not undo it on the next launch.</summary>

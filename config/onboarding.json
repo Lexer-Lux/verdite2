@@ -1,6 +1,6 @@
 {
   "_comment": "The first-run setup's groups and tiers; read by Verdite Core's Onboarding (tools/verdite-core/src/Onboarding). See \"Onboarding\" in docs/SETTINGS.md.",
-  "version": 1,
+  "version": 2,
   "welcome": "kf2.setup.welcome",
   "welcomeAgain": "kf2.setup.welcomeagain",
   "existing": "kf2.",
@@ -42,7 +42,8 @@
     "kf2.analog.accel": "False",
     "kf2.enemyturn": "1",
     "kf2.widescreen.hud": "False",
-    "kf2.renderdistance": "10.5"
+    "kf2.renderdistance": "10.5",
+    "kf2.controls.profile": "0"
   },
   "display": [
     {
@@ -640,6 +641,48 @@
   ],
   "pages": [
     {
+      "id": "bindings",
+      "title": "kf2.setup.bindings",
+      "body": [
+        "kf2.setup.bindings.body"
+      ],
+      "label": "kf2.setup.bindings.layout",
+      "options": [
+        {
+          "label": "kf2.setup.bindings.keep",
+          "desc": "kf2.setup.bindings.keep.desc",
+          "set": {
+            "kf2.controls.profile": null
+          }
+        },
+        {
+          "label": "kf2.setup.bindings.classic",
+          "desc": "kf2.setup.bindings.classic.desc",
+          "set": {
+            "kf2.controls.profile": "1"
+          }
+        },
+        {
+          "label": "kf2.setup.bindings.modern",
+          "desc": "kf2.setup.bindings.modern.desc",
+          "set": {
+            "kf2.controls.profile": "2"
+          }
+        }
+      ],
+      "presets": [
+        {
+          "option": 0
+        },
+        {
+          "option": 0
+        },
+        {
+          "option": 0
+        }
+      ]
+    },
+    {
       "id": "turning",
       "title": "kf2.setup.turning",
       "body": [
@@ -1179,6 +1222,51 @@
       "en": "Reload last save",
       "pt-BR": "Recarregar último save",
       "es-419": "Recargar último guardado"
+    },
+    "kf2.setup.bindings": {
+      "en": "Controls",
+      "pt-BR": "Controles",
+      "es-419": "Controles"
+    },
+    "kf2.setup.bindings.body": {
+      "en": "Choose a control layout, or keep your current bindings. Choosing Classic or Modern replaces keyboard and controller bindings; later custom changes are preserved on startup.",
+      "pt-BR": "Escolha um esquema ou mantenha suas teclas atuais. Clássico ou Moderno substitui os comandos do teclado e controle; mudanças posteriores são preservadas ao iniciar.",
+      "es-419": "Elige un esquema o conserva tus controles actuales. Clásico o Moderno reemplaza las asignaciones de teclado y mando; los cambios posteriores se conservan al iniciar."
+    },
+    "kf2.setup.bindings.layout": {
+      "en": "Control layout",
+      "pt-BR": "Esquema de controle",
+      "es-419": "Esquema de controles"
+    },
+    "kf2.setup.bindings.keep": {
+      "en": "Keep current controls",
+      "pt-BR": "Manter controles atuais",
+      "es-419": "Conservar controles actuales"
+    },
+    "kf2.setup.bindings.keep.desc": {
+      "en": "Keep custom keyboard and controller bindings.",
+      "pt-BR": "Mantém seus comandos personalizados de teclado e controle.",
+      "es-419": "Conserva tus asignaciones de teclado y mando."
+    },
+    "kf2.setup.bindings.classic": {
+      "en": "Classic Controls",
+      "pt-BR": "Controles clássicos",
+      "es-419": "Controles clásicos"
+    },
+    "kf2.setup.bindings.classic.desc": {
+      "en": "The original Verdite2 port defaults: F interacts; hold the interaction input to run. Controller bindings match upstream, without separate run.",
+      "pt-BR": "Padrões originais do Verdite2: F interage; segure o botão de interação para correr. Controle original, sem corrida separada.",
+      "es-419": "Controles originales de Verdite2: F interactúa; mantén la entrada de interacción para correr. Mando original, sin carrera separada."
+    },
+    "kf2.setup.bindings.modern": {
+      "en": "Modern Controls",
+      "pt-BR": "Controles modernos",
+      "es-419": "Controles modernos"
+    },
+    "kf2.setup.bindings.modern.desc": {
+      "en": "E interacts; hold Shift to run. Cross interacts, hold Circle to run, RT/RB attack, LT/LB cast. F2 opens Remaster Editor.",
+      "pt-BR": "E interage; segure Shift para correr. X interage, segure Círculo para correr, RT/RB ataca e LT/LB lança magia. F2 abre o editor de remasterização.",
+      "es-419": "E interactúa; mantén Shift para correr. Cruz interactúa, mantén Círculo para correr, RT/RB ataca y LT/LB lanza magia. F2 abre el editor de remasterización."
     }
   }
 }

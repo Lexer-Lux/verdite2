@@ -19,6 +19,7 @@ public static class KeyLayoutApply
 {
     static Func<KeyBindings> _layout = () => new();
     static KeyBindings[] _superseded = [];
+    static KeyBindings[] _secondaryLayouts = [];
     static int _version;
     static string _announce = "";
     static Func<int> _getApplied = () => 0;
@@ -40,11 +41,13 @@ public static class KeyLayoutApply
         KeyBindings[] superseded,
         string announce,
         Func<int> getApplied,
-        Action<int> setApplied)
+        Action<int> setApplied,
+        KeyBindings[]? secondaryLayouts = null)
     {
         _layout = layout;
         _version = version;
         _superseded = superseded;
+        _secondaryLayouts = secondaryLayouts ?? [];
         _announce = announce;
         _getApplied = getApplied;
         _setApplied = setApplied;
@@ -114,7 +117,8 @@ public static class KeyLayoutApply
         _setApplied(_version);
     }
 
-    public static bool IsApplied() => Matches(ConfigManager.Game.Keys, _layout());
+    public static bool IsApplied() => Matches(ConfigManager.Game.Keys, _layout()) ||
+        _secondaryLayouts.Any(layout => Matches(ConfigManager.Game.Keys, layout));
 
     /// <summary>
     /// The second key for a button the runtime's table cannot hold. Binding W to

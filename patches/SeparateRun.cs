@@ -27,10 +27,10 @@ public static class SeparateRun
         Start = [], Select = [4], Up = [11], Down = [12], Left = [13], Right = [14],
     };
 
-    public static void ApplyPadLayout()
+    public static void ApplyPadLayout(bool modern = true)
     {
-        ConfigManager.Game.Pad = Layout();
-        ConfigManager.Game.PadAnalog = Layout();
+        ConfigManager.Game.Pad = modern ? Layout() : new GamepadBindings();
+        ConfigManager.Game.PadAnalog = modern ? Layout() : GamepadBindings.DefaultAnalog();
         ConfigManager.SaveGame();
         Settings.PatchSettings.Set(PadVersion, 1);
     }

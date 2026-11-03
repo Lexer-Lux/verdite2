@@ -147,6 +147,8 @@ public static class Setup
 
     static readonly Dictionary<string, WindowKey> Window = new(StringComparer.OrdinalIgnoreCase)
     {
+        [ControlProfiles.Key] = new(t => ControlProfiles.Apply(I(t, 0)),
+            () => ControlProfiles.Selected.ToString(CultureInfo.InvariantCulture)),
         [Analog.OnKey] = new(t => Analog.Enabled = B(t, true), () => Text(Analog.Enabled)),
         [Perspective.OnKey] = new(t => Perspective.SetEnabled(B(t, true)), () => Text(Perspective.Enabled), "KF2_PERSPECTIVE"),
         [Subpixel.OnKey] = new(t => Subpixel.SetEnabled(B(t, true)), () => Text(Subpixel.Enabled), "KF2_SUBPIXEL"),

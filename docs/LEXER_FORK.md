@@ -255,4 +255,37 @@ stack restoration and both source mods compiling through the real ModCompiler.
 A private headless source-fork boot loaded Better UI and Better Poison, committed
 their1/7hooks and the API hooks, displayed POISONED/POISON CURED through the actual
 font routine, and measured a green poison wash. No player data or live session
-was changed. GPU appearance remains a human check.
+was changed. Original-font notifications were also observed in isolated native
+GPU captures. Physical controller feel remains a separate check.
+
+## Retained model final RGB mixing
+
+Lexer preview5 adds `RetainedScene.ModelInstance.ColourMixRgb` and `ColourMix`.
+The first is a low24-bit target RGB (`0x0000FF` is red); the second is a finite
+strength0..1. The renderer mixes the finished textured, lit and fogged RGB
+toward that target before output quantization. Zero keeps the original path.
+The colour draw uploads each instance's value and clears the uniform when its
+instance range ends. Normal/shadow data, texture holes, alpha, blending and
+depth remain unchanged. Mirror instance copies carry the same captured fields.
+
+This is renderer work: the original game has no final textured-colour mixing
+routine. The API contains no damage, HP, duration or enemy policy. Source mods
+own those values and edit only the instances emitted by their scoped world draw,
+guarded by frame identity. Hit Feedback uses the API instead of editing RGBC:
+lighting multiplication cannot turn a zero-red green texel red.
+
+The API supports retained GPU model instances. Packet fallback, software/GL21
+and non-instanced dynamic geometry are outside this API; a mod must report that
+support boundary rather than silently substitute a different visual effect.
+Hit Feedback reports the GPU geometry requirement in its settings when needed.
+
+Private native GPU captures with all ten authored mods loaded show the real
+plant at zero,37.5% and100% mix: zero is its original appearance, partial strength
+retains texture/shading, and full strength is red with native holes and silhouette.
+The full endpoint contains3313 pure-red opaque pixels; no changed pixels occur
+outside the expanded creature region between the partial/full captures. These
+are animated, quantized captures, so they do not claim a same-texel numerical
+weight comparison. Actual native damage220->148 starts a981ms pulse at a3-second
+maximum and fades back to green. No HP writes create that damage: the private
+fixture calls the original damage routine against the existing loaded creature.
+Audio/input/visibility guards and owned process-tree cleanup are verified.

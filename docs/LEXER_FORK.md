@@ -32,8 +32,13 @@ mod uses F10 instead, retaining its other shortcuts.
 The launcher and all game sources compiled on Windows with .NET 10.0.403.
 A private headless session booted a copied slot 1 save into fdat02 with no active
 mods, and logged both separate-run detours committed. This establishes build
-and attachment, not controller feel or complete menu acceptance. Further checks
-must measure run versus use, menu back and F2 without changing a player's saves.
+and attachment, not controller feel or complete menu acceptance.
+
+A scratch probe executed the original game's run routine against disc-initialized
+RAM. Interact alone did not run; Run and Run+Interact did; disabling separate input
+restored vanilla held-Interact running. Every scoped input bit was restored.
+Keyboard events opened and closed Remaster Editor on F2; repeated keydown did not
+toggle it. Physical controller feel and menu-back presentation remain unaccepted.
 
 The reported consumed Fire Crystal with no learned spell remains under
 investigation. No gameplay-mod fix or save repair is claimed here.
